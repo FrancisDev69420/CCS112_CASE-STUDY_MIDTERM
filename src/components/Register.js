@@ -6,15 +6,22 @@ function Register() {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [role, setRole] = useState("");
     const navigate = useNavigate();
 
     const handleRegister = async (e) => {
         e.preventDefault();
         try {
-            await axios.post("http://127.0.0.1:8000/api/register", { name, email, password });
+            await axios.post("http://127.0.0.1:8000/api/register", { name, email, password, role });
             navigate("/");
         } catch (error) {
-            alert("Registration failed");
+            // Check if error response exists and extract message
+            if (error.response && error.response.data && error.response.data.message) {
+                alert(`Registration failed: ${error.response.data.message}`);
+            } else {
+                // Default error message if response is not in the expected format
+                alert("Registration failed. Please try again.");
+            }
         }
     };
 
@@ -34,6 +41,14 @@ function Register() {
                     <div className="mb-3">
                         <label className="form-label">Password</label>
                         <input type="password" className="form-control" onChange={(e) => setPassword(e.target.value)} required />
+                    </div>
+                     <div className="mb-3">
+                        <label className="form-label">Role</label>
+                        <select className="form-select" value={role} onChange={(e) => setRole(e.target.value)} required>
+                            <option value="">Select a role</option>
+                            <option value="Project Manager">Project Manager</option>
+                            <option value="Team Member">Team Member</option>
+                        </select>
                     </div>
                     <button type="submit" className="btn btn-success w-100">Register</button>
                 </form>

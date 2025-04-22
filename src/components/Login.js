@@ -14,8 +14,19 @@ function Login() {
         e.preventDefault();
         try {
             const response = await axios.post("http://127.0.0.1:8000/api/login", { email, password });
-            localStorage.setItem("token", response.data.token);
-            navigate("/dashboard");
+
+            const {token, role} = response.data;
+
+            localStorage.setItem("token", token);
+            localStorage.setItem("role", role);
+            localStorage.setItem("user_id", response.data.user_id); 
+
+             // Check if the user is a project manager
+            if (role === "Project Manager") {
+                navigate("/dashboard"); // Navigate to dashboard if project manager
+            } else {
+                alert("You do not have permission to access the Project Dashboard");
+            }
         } catch (error) {
             alert("Invalid credentials");
         }
