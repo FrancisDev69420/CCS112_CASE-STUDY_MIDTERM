@@ -115,6 +115,8 @@ function Dashboard() {
             title: project.title,
             description: project.description,
             budget: project.budget,
+            start_date: project.start_date || "",  
+            deadline: project.deadline || ""       
         });
         setShowModal(true);
     };
@@ -127,20 +129,23 @@ function Dashboard() {
         const userId = localStorage.getItem("user_id");
 
         axios
-            .put(`http://127.0.0.1:8000/api/projects/${editingProject.id}`, 
-                { 
-                    title: newProject.title, 
-                    description: newProject.description, 
+            .put(
+                `http://127.0.0.1:8000/api/projects/${editingProject.id}`,
+                {
+                    title: newProject.title,
+                    description: newProject.description,
                     budget: parseFloat(newProject.budget),
-                    user_id: userId
-                }, 
+                    user_id: userId,
+                    start_date: newProject.start_date,  
+                    deadline: newProject.deadline,     
+                },
                 { headers: { Authorization: `Bearer ${token}` } }
             )
             .then((response) => {
-                setProjects(projects.map(p => p.id === editingProject.id ? response.data : p));
+                setProjects(projects.map((p) => (p.id === editingProject.id ? response.data : p)));
                 setShowModal(false);
-                setNewProject({ title: "", description: "", budget: "" });
-                setEditingProject(null);
+                setNewProject({ title: "", description: "", budget: "", start_date: "", deadline: "" });  // Clear all fields
+                setEditingProject(null);  // Reset editing state
             })
             .catch((error) => {
                 console.error("Error updating project:", error);
@@ -164,14 +169,22 @@ function Dashboard() {
         }
     };
 
-    // Task modal form submit
+    // Task modal form submit for adding a new task
     const handleAddTask = (e) => {
         e.preventDefault();
 
         const token = localStorage.getItem("token");
 
+        const taskData = {
+            ...newTask,
+            start_date: newTask.start_date, 
+            deadline: newTask.deadline      
+        };
+
         axios
-            .post(`http://127.0.0.1:8000/api/projects/${selectedProject}/tasks`, newTask, { headers: { Authorization: `Bearer ${token}` } })
+            .post(`http://127.0.0.1:8000/api/projects/${selectedProject}/tasks`, taskData, {
+                headers: { Authorization: `Bearer ${token}` }
+            })
             .then((response) => {
                 setTasks([...tasks, response.data]);
                 setTaskModalShow(false);
@@ -181,6 +194,8 @@ function Dashboard() {
                     status: "pending",
                     priority: "low",
                     user_id: "",
+                    start_date: "", 
+                    deadline: ""     
                 });
             })
             .catch((error) => {
@@ -189,33 +204,56 @@ function Dashboard() {
             });
     };
 
+    // Handle editing an existing task
     const handleEditTask = (task) => {
         setEditingTask(task);
-        setNewTask({ 
-            title: task.title, 
-            description: task.description, 
-            status: task.status, 
-            priority: task.priority, 
-            user_id: task.user_id 
+        setNewTask({
+            title: task.title,
+            description: task.description,
+            status: task.status,
+            priority: task.priority,
+            user_id: task.user_id,
+            start_date: task.start_date, // Load existing start_date
+            deadline: task.deadline      // Load existing deadline
         });
         setEditTaskModalShow(true);
     };
 
+    // Handle updating an existing task
     const handleUpdateTask = (e) => {
         e.preventDefault();
         const token = localStorage.getItem("token");
-        axios.put(`http://127.0.0.1:8000/api/projects/${selectedProject}/tasks/${editingTask.id}`, newTask, { headers: { Authorization: `Bearer ${token}` } })
-            .then(res => {
-                setTasks(tasks.map(t => t.id === editingTask.id ? res.data : t));
+
+        // Add start_date and deadline to the updated task data
+        const taskData = {
+            ...newTask,
+            start_date: newTask.start_date, // Ensure the start date is included
+            deadline: newTask.deadline      // Ensure the deadline is included
+        };
+
+        axios.put(`http://127.0.0.1:8000/api/projects/${selectedProject}/tasks/${editingTask.id}`, taskData, {
+            headers: { Authorization: `Bearer ${token}` }
+        })
+            .then((res) => {
+                setTasks(tasks.map((t) => (t.id === editingTask.id ? res.data : t)));
                 setEditTaskModalShow(false);
-                setNewTask({ title: "", description: "", status: "pending", priority: "low", user_id: "" });
+                setNewTask({
+                    title: "",
+                    description: "",
+                    status: "pending",
+                    priority: "low",
+                    user_id: "",
+                    start_date: "",  // Reset start_date field
+                    deadline: ""     // Reset deadline field
+                });
                 setEditingTask(null);
             })
-            .catch(err => {
+            .catch((err) => {
                 console.error("Error updating task:", err);
                 alert("Failed to update task");
             });
     };
+
 
     const handleDeleteTask = (taskId) => {
         const token = localStorage.getItem("token");
@@ -246,17 +284,43 @@ function Dashboard() {
 
             {/* Add Project Button */}
             <div className="d-flex justify-content-start mb-3">
-                <Button variant="success" onClick={() => setShowModal(true)}>Add Project</Button>
+                <Button 
+                    variant="success" 
+                    onClick={() => {
+                        setEditingProject(null);  // Reset editing state
+                        setNewProject({ title: "", description: "", budget: "", start_date: "", deadline: "" });  // Reset form fields
+                        setShowModal(true);
+                    }}
+                >
+                    Add Project
+                </Button>
             </div>
 
             {/* Conditionally render Add Task button if a project is selected */}
             {selectedProject && (
-                <div className="d-flex justify-content-start mb-3">
-                    <Button variant="primary" onClick={() => setTaskModalShow(true)}>Add Task</Button>
-                </div>
-            )}
+            <div className="d-flex justify-content-start mb-3">
+                <Button 
+                    variant="primary" 
+                    onClick={() => {
+                        setEditingTask(null);  // Reset editing task state
+                        setNewTask({
+                            title: "",
+                            description: "",
+                            status: "pending",
+                            priority: "low",
+                            user_id: "",
+                            start_date: "",
+                            deadline: ""
+                        });  // Reset task form fields
+                        setTaskModalShow(true);
+                    }}
+                >
+                    Add Task
+                </Button>
+            </div>
+        )}
 
-            {/* Modal for Adding Project */}
+            {/* Modal for Adding/Editing Project */}
             <Modal show={showModal} onHide={() => setShowModal(false)} centered>
                 <Modal.Header closeButton>
                     <Modal.Title>{editingProject ? "Edit Project" : "Add New Project"}</Modal.Title>
@@ -289,12 +353,30 @@ function Dashboard() {
                                 required
                             />
                         </Form.Group>
+                        <Form.Group className="mb-3" controlId="formStartDate">
+                            <Form.Label>Start Date</Form.Label>
+                            <Form.Control
+                                type="date"
+                                value={newProject.start_date}
+                                onChange={(e) => setNewProject({ ...newProject, start_date: e.target.value })}
+                            />
+                        </Form.Group>
+                        <Form.Group className="mb-3" controlId="formDeadline">
+                            <Form.Label>Deadline</Form.Label>
+                            <Form.Control
+                                type="date"
+                                value={newProject.deadline}
+                                onChange={(e) => setNewProject({ ...newProject, deadline: e.target.value })}
+                            />
+                        </Form.Group>
                         <Button variant="primary" type="submit">
                             {editingProject ? "Update Project" : "Save Project"}
                         </Button>
                     </Form>
                 </Modal.Body>
             </Modal>
+
+
 
             {/* Modal for Adding Task */}
             <Modal show={taskModalShow} onHide={() => setTaskModalShow(false)} centered>
@@ -347,12 +429,31 @@ function Dashboard() {
                                     ))}
                             </Form.Control>
                         </Form.Group>
+                        {/* Add Start Date */}
+                        <Form.Group className="mb-3" controlId="formStartDate">
+                            <Form.Label>Start Date</Form.Label>
+                            <Form.Control
+                                type="date"
+                                value={newTask.start_date}
+                                onChange={(e) => setNewTask({ ...newTask, start_date: e.target.value })}
+                            />
+                        </Form.Group>
+                        {/* Add Deadline */}
+                        <Form.Group className="mb-3" controlId="formDeadline">
+                            <Form.Label>Deadline</Form.Label>
+                            <Form.Control
+                                type="date"
+                                value={newTask.deadline}
+                                onChange={(e) => setNewTask({ ...newTask, deadline: e.target.value })}
+                            />
+                        </Form.Group>
                         <Button variant="primary" type="submit">
                             Save Task
                         </Button>
                     </Form>
                 </Modal.Body>
             </Modal>
+
 
             {/* Modal for Editing Task */}
             <Modal show={editTaskModalShow} onHide={() => setEditTaskModalShow(false)} centered>
@@ -417,6 +518,24 @@ function Dashboard() {
                                     ))}
                             </Form.Control>
                         </Form.Group>
+                        {/* Edit Start Date */}
+                        <Form.Group className="mb-3" controlId="formStartDate">
+                            <Form.Label>Start Date</Form.Label>
+                            <Form.Control
+                                type="date"
+                                value={newTask.start_date}
+                                onChange={(e) => setNewTask({ ...newTask, start_date: e.target.value })}
+                            />
+                        </Form.Group>
+                        {/* Edit Deadline */}
+                        <Form.Group className="mb-3" controlId="formDeadline">
+                            <Form.Label>Deadline</Form.Label>
+                            <Form.Control
+                                type="date"
+                                value={newTask.deadline}
+                                onChange={(e) => setNewTask({ ...newTask, deadline: e.target.value })}
+                            />
+                        </Form.Group>
                         <Button variant="primary" type="submit">
                             Update Task
                         </Button>
@@ -424,12 +543,13 @@ function Dashboard() {
                 </Modal.Body>
             </Modal>
 
+
             {/* Projects List */}
             <Projects
                 projects={projects}
                 onProjectClick={handleProjectClick}
-                onEdit={handleEditProject}
-                onDelete={handleDeleteProject}
+                onEditProject={handleEditProject}
+                onDeleteProject={handleDeleteProject}
             />
 
             {/* Tasks List */}

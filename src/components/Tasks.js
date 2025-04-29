@@ -11,6 +11,8 @@ function Tasks({ tasks = [], onEditTask, onDeleteTask }) {
                         <th>Status</th>
                         <th>Priority</th>
                         <th>Assigned to</th>
+                        <th>Start Date</th> {/* New column for Start Date */}
+                        <th>Deadline</th> {/* New column for Deadline */}
                         <th>Actions</th> {/* New column for actions */}
                     </tr>
                 </thead>
@@ -23,6 +25,8 @@ function Tasks({ tasks = [], onEditTask, onDeleteTask }) {
                                 <td>{task.status}</td> {/* Display the status */}
                                 <td>{task.priority}</td> {/* Display the priority */}
                                 <td>{task.user ? task.user.name : 'Not assigned'}</td> {/* Display the assigned user */}
+                                <td>{task.start_date ? new Date(task.start_date).toLocaleDateString() : 'N/A'}</td> {/* Display Start Date */}
+                                <td>{task.deadline ? new Date(task.deadline).toLocaleDateString() : 'N/A'}</td> {/* Display Deadline */}
                                 <td>
                                     <button onClick={() => onEditTask(task)} className="btn btn-primary btn-sm me-2">
                                         Edit
@@ -35,7 +39,7 @@ function Tasks({ tasks = [], onEditTask, onDeleteTask }) {
                         ))
                     ) : (
                         <tr>
-                            <td colSpan="6" className="text-center">No tasks available</td> {/* Adjusted colSpan for the new Actions column */}
+                            <td colSpan="8" className="text-center">No tasks available</td> {/* Adjusted colSpan for the new columns */}
                         </tr>
                     )}
                 </tbody>

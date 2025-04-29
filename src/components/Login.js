@@ -24,8 +24,10 @@ function Login() {
              // Check if the user is a project manager
             if (role === "Project Manager") {
                 navigate("/dashboard"); // Navigate to dashboard if project manager
+            } else if (role === "Team Member") {
+                navigate("/Member-Dashboard"); // Navigate to member dashboard if team member
             } else {
-                alert("You do not have permission to access the Project Dashboard");
+                alert("Invalid role"); 
             }
         } catch (error) {
             alert("Invalid credentials");
