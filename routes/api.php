@@ -60,4 +60,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/projects/{projectId}/tasks/{taskId}', [TaskController::class, 'show']); // Get a single task
     Route::put('/projects/{projectId}/tasks/{taskId}', [TaskController::class, 'update']); // Update a task
     Route::delete('/projects/{projectId}/tasks/{taskId}', [TaskController::class, 'destroy']); // Delete a task
+
 });
