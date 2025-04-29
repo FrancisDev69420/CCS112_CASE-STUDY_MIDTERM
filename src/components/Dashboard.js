@@ -176,8 +176,24 @@ function Dashboard() {
         }
     };
 
+    // Function to refresh projects data
+    const refreshProjects = () => {
+        const token = localStorage.getItem("token");
+        
+        axios
+            .get("http://127.0.0.1:8000/api/dashboard", { 
+                headers: { Authorization: `Bearer ${token}` } 
+            })
+            .then((response) => {
+                setProjects(response.data.projects || []);
+            })
+            .catch((error) => {
+                console.error("Error refreshing projects:", error);
+            });
+    };
+
     // Task modal form submit for adding a new task
-   const handleAddTask = (e) => {
+    const handleAddTask = (e) => {
         e.preventDefault();
 
         const token = localStorage.getItem("token");
@@ -186,8 +202,8 @@ function Dashboard() {
             ...newTask,
             start_date: newTask.start_date,
             deadline: newTask.deadline,
-            allocated_budget: newTask.allocated_budget,  // Include allocated_budget
-            actual_spent: newTask.actual_spent           // Include actual_spent
+            allocated_budget: newTask.allocated_budget,
+            actual_spent: newTask.actual_spent
         };
 
         axios
@@ -205,9 +221,12 @@ function Dashboard() {
                     user_id: "",
                     start_date: "",
                     deadline: "",
-                    allocated_budget: "",  // Reset allocated_budget
-                    actual_spent: ""       // Reset actual_spent
+                    allocated_budget: "",
+                    actual_spent: ""
                 });
+                
+                // Refresh projects to update the remaining budget
+                refreshProjects();
             })
             .catch((error) => {
                 console.error("Error adding task:", error);
@@ -242,8 +261,8 @@ function Dashboard() {
             ...newTask,
             start_date: newTask.start_date,
             deadline: newTask.deadline,
-            allocated_budget: newTask.allocated_budget,  // Include allocated_budget
-            actual_spent: newTask.actual_spent           // Include actual_spent
+            allocated_budget: newTask.allocated_budget,
+            actual_spent: newTask.actual_spent
         };
 
         axios.put(`http://127.0.0.1:8000/api/projects/${selectedProject}/tasks/${editingTask.id}`, taskData, {
@@ -260,14 +279,17 @@ function Dashboard() {
                 user_id: "",
                 start_date: "",
                 deadline: "",
-                allocated_budget: "",  // Reset allocated_budget
-                actual_spent: ""       // Reset actual_spent
+                allocated_budget: "",
+                actual_spent: ""
             });
             setEditingTask(null);
+            
+            // Refresh projects to update the remaining budget
+            refreshProjects();
         })
         .catch((err) => {
             console.error("Error updating task:", err);
-            alert( "Failed to update task: " + err.response.data.error);
+            alert("Failed to update task: " + err.response.data.error);
         });
     };
 
@@ -277,9 +299,14 @@ function Dashboard() {
 
         if (window.confirm("Are you sure you want to delete this task?")) {
             axios
-                .delete(`http://127.0.0.1:8000/api/projects/${selectedProject}/tasks/${taskId}`, { headers: { Authorization: `Bearer ${token}` } })
+                .delete(`http://127.0.0.1:8000/api/projects/${selectedProject}/tasks/${taskId}`, { 
+                    headers: { Authorization: `Bearer ${token}` } 
+                })
                 .then(() => {
                     setTasks(tasks.filter((task) => task.id !== taskId));
+                    
+                    // Refresh projects to update the remaining budget
+                    refreshProjects();
                 })
                 .catch((error) => {
                     console.error("Error deleting task:", error);

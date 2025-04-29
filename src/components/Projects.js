@@ -53,7 +53,7 @@ function Projects({ projects, onProjectClick, onEditProject, onDeleteProject, se
                     ))
                 ) : (
                     <tr>
-                        <td colSpan="7" className="text-center">No projects available</td> {/* Adjusted colspan to 7 */}
+                        <td colSpan="7" className="text-center">No projects available</td> 
                     </tr>
                 )}
             </tbody>
