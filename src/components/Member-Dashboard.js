@@ -12,6 +12,8 @@ function MemberDashboard() {
     const [showStatusModal, setShowStatusModal] = useState(false);
     const [currentTask, setCurrentTask] = useState(null);
     const [newStatus, setNewStatus] = useState("");
+    const [newAllocatedBudget, setNewAllocatedBudget] = useState(0);
+    const [newActualSpent, setNewActualSpent] = useState(0);
     const [currentProjectId, setCurrentProjectId] = useState(null);
     const navigate = useNavigate();
 
@@ -71,6 +73,8 @@ function MemberDashboard() {
         setCurrentProjectId(projectId);
         setCurrentTask(task);
         setNewStatus(task.status);
+        setNewAllocatedBudget(task.allocated_budget || 0);
+        setNewActualSpent(task.actual_spent || 0);
         setShowStatusModal(true);
     };
 
@@ -90,7 +94,9 @@ function MemberDashboard() {
                     priority: currentTask.priority,
                     user_id: currentTask.user_id,
                     start_date: currentTask.start_date,
-                    deadline: currentTask.deadline
+                    deadline: currentTask.deadline,
+                    allocated_budget: newAllocatedBudget,
+                    actual_spent: newActualSpent
                 },
                 { headers: { Authorization: `Bearer ${token}` } }
             )
@@ -100,19 +106,22 @@ function MemberDashboard() {
                 updatedProjects.forEach(project => {
                     if (project.id === currentProjectId) {
                         project.tasks = project.tasks.map(task => 
-                            task.id === currentTask.id ? {...task, status: newStatus} : task
+                            task.id === currentTask.id ? {
+                                ...task, 
+                                status: newStatus,
+                                allocated_budget: newAllocatedBudget,
+                                actual_spent: newActualSpent
+                            } : task
                         );
                     }
                 });
                 setProjects(updatedProjects);
                 setShowStatusModal(false);
                 
-                // Alternatively, refetch all data if the local state update is complex
-                // fetchDashboardData();
             })
             .catch(error => {
-                console.error("Error updating task status:", error);
-                alert("Failed to update task status");
+                console.error("Error updating task:", error);
+                alert("Failed to update task: " + error.response.data.error);
             });
     };
 
@@ -159,6 +168,8 @@ function MemberDashboard() {
                                                     <th>Priority</th>
                                                     <th>Start Date</th>
                                                     <th>Deadline</th>
+                                                    <th>Allocated Budget</th>
+                                                    <th>Actual Spent</th>
                                                     <th>Actions</th>
                                                 </tr>
                                             </thead>
@@ -190,6 +201,22 @@ function MemberDashboard() {
                                                         <td>{task.start_date ? task.start_date : "N/A"}</td>
                                                         <td>{task.deadline ? task.deadline : "N/A"}</td>
                                                         <td>
+                                                            {task.allocated_budget != null
+                                                                ? new Intl.NumberFormat('en-PH', {
+                                                                    style: 'currency',
+                                                                    currency: 'PHP',
+                                                                }).format(task.allocated_budget)
+                                                                : '₱0.00'}
+                                                        </td>
+                                                        <td>
+                                                            {task.actual_spent != null
+                                                                ? new Intl.NumberFormat('en-PH', {
+                                                                    style: 'currency',
+                                                                    currency: 'PHP',
+                                                                }).format(task.actual_spent)
+                                                                : '₱0.00'}
+                                                        </td>
+                                                        <td>
                                                             <Button 
                                                                 variant="outline-success" 
                                                                 size="sm"
@@ -198,7 +225,7 @@ function MemberDashboard() {
                                                                     openStatusModal(project.id, task);
                                                                 }}
                                                             >
-                                                                Update Status
+                                                                Update
                                                             </Button>
                                                         </td>
                                                     </tr>
@@ -234,6 +261,24 @@ function MemberDashboard() {
                                         <option value="in progress">In Progress</option>
                                         <option value="completed">Completed</option>
                                     </Form.Control>
+                                </Form.Group>
+                                {/* Edit Allocated Budget */}
+                                <Form.Group className="mb-3" controlId="formAllocatedBudget">
+                                    <Form.Label>Allocated Budget</Form.Label>
+                                    <Form.Control
+                                        type="number"
+                                        value={newAllocatedBudget}
+                                        onChange={(e) => setNewAllocatedBudget(parseFloat(e.target.value) || 0)}
+                                    />
+                                </Form.Group>
+                                {/* Edit Actual Spent */}
+                                <Form.Group className="mb-3" controlId="formActualSpent">
+                                    <Form.Label>Actual Spent</Form.Label>
+                                    <Form.Control
+                                        type="number"
+                                        value={newActualSpent}
+                                        onChange={(e) => setNewActualSpent(parseFloat(e.target.value) || 0)}
+                                    />
                                 </Form.Group>
                             </Form>
                         </>

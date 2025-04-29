@@ -36,8 +36,8 @@ function Login() {
 
     return (
         <div className="container d-flex justify-content-center align-items-center vh-100">
-            <div className="card p-4 shadow-lg" style={{ width: "400px" }}>
-                <img src={logo} alt="Logo" className="mb-3" />
+            <div className="card p-4 shadow-lg" style={{ width: "400px"}}>
+                <img src={logo} alt="Logo" className="mb-3 d-block mx-auto" style={{width: "200px"}} />
                 <h1 className="text-center fw-bold">Klick Inc.</h1>
                 <h2 className="text-center">Login</h2>
                 <form onSubmit={handleLogin}>

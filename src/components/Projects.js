@@ -1,6 +1,6 @@
 import React from "react";
 
-function Projects({ projects, onProjectClick, onEditProject, onDeleteProject }) {
+function Projects({ projects, onProjectClick, onEditProject, onDeleteProject, selectedProjectId }) {
     
     return (
         <table className="table table-bordered">
@@ -10,6 +10,7 @@ function Projects({ projects, onProjectClick, onEditProject, onDeleteProject }) 
                     <th>Project Name</th>
                     <th>Description</th>
                     <th>Budget</th>
+                    <th>Remaining Budget</th>
                     <th>Start Date</th> {/* Added Start Date Column */}
                     <th>Deadline</th> {/* Added Deadline Column */}
                     <th>Actions</th>
@@ -18,19 +19,31 @@ function Projects({ projects, onProjectClick, onEditProject, onDeleteProject }) 
             <tbody>
                 {projects.length > 0 ? (
                     projects.map((project, index) => (
-                        <tr key={project.id} onClick={() => onProjectClick(project)} style={{ cursor: "pointer" }}>
+                        <tr key={project.id} onClick={() => onProjectClick(project)} style={{ cursor: "pointer" }}
+                            className={project.id === selectedProjectId ? "table-success" : "table-light"}
+                        >
                             <td>{index + 1}</td>
                             <td>{project.title}</td>
                             <td>{project.description}</td>
                             <td>{new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(project.budget)}</td>
+                            <td>{new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(project.remaining_budget)}</td>
                             <td>{project.start_date ? new Date(project.start_date).toLocaleDateString() : "N/A"}</td>
                             <td>{project.deadline ? new Date(project.deadline).toLocaleDateString() : "N/A"}</td>
                             <td>
-                                <button onClick={() => onEditProject(project)} className="btn btn-warning me-2">
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onEditProject(project);
+                                    }}
+                                    className="btn btn-warning me-2"
+                                >
                                     Edit
                                 </button>
                                 <button
-                                    onClick={() => onDeleteProject(project.id)}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onDeleteProject(project.id);
+                                    }}
                                     className="btn btn-danger"
                                 >
                                     Delete

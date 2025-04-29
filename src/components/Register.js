@@ -13,7 +13,9 @@ function Register() {
         e.preventDefault();
         try {
             await axios.post("http://127.0.0.1:8000/api/register", { name, email, password, role });
+            alert("Successfully registered");
             navigate("/");
+            
         } catch (error) {
             // Check if error response exists and extract message
             if (error.response && error.response.data && error.response.data.message) {

@@ -10,8 +10,9 @@ function Dashboard() {
     const [message, setMessage] = useState("");
     const [projects, setProjects] = useState([]);
     const [selectedProject, setSelectedProject] = useState(null);
+    const [selectedProjectId, setSelectedProjectId] = useState(null);
     const [tasks, setTasks] = useState([]);
-    const [newProject, setNewProject] = useState({ title: "", description: "", budget: "" });
+    const [newProject, setNewProject] = useState({ title: "", description: "", budget: "", start_date: "", deadline: ""  });
     const [editingProject, setEditingProject] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [taskModalShow, setTaskModalShow] = useState(false); // Toggle task modal visibility
@@ -22,6 +23,10 @@ function Dashboard() {
         status: "pending",
         priority: "low",
         user_id: "",
+        start_date: "",
+        deadline: "",
+        allocated_budget: "", // New field for allocated budget
+        actual_spent: "" // New field for actual spent
     });
     const [editingTask, setEditingTask] = useState(null);
     const [users, setUsers] = useState([]);
@@ -65,8 +70,8 @@ function Dashboard() {
     const handleProjectClick = (project) => {
         console.log("Selected Project:", project); // Log the selected project
         if (selectedProject === project.id) {
-            setSelectedProject(null);
             setTasks([]); // Clear tasks if the same project is clicked again
+            setSelectedProject(null);
         } else {
             axios
                 .get(`http://127.0.0.1:8000/api/projects/${project.id}/tasks`, {
@@ -94,14 +99,16 @@ function Dashboard() {
                     title: newProject.title, 
                     description: newProject.description,  
                     budget: parseFloat(newProject.budget),
-                    user_id: userId
+                    user_id: userId,
+                    start_date: newProject.start_date,  
+                    deadline: newProject.deadline, 
                 }, 
                 { headers: { Authorization: `Bearer ${token}` } }
             )
             .then((response) => {
                 setProjects([...projects, response.data]);
                 setShowModal(false);
-                setNewProject({ title: "", description: "", budget: "" });
+                setNewProject({ title: "", description: "", budget: "", start_date: "", deadline: "" });
             })
             .catch((error) => {
                 console.error("Error adding project:", error);
@@ -170,15 +177,17 @@ function Dashboard() {
     };
 
     // Task modal form submit for adding a new task
-    const handleAddTask = (e) => {
+   const handleAddTask = (e) => {
         e.preventDefault();
 
         const token = localStorage.getItem("token");
 
         const taskData = {
             ...newTask,
-            start_date: newTask.start_date, 
-            deadline: newTask.deadline      
+            start_date: newTask.start_date,
+            deadline: newTask.deadline,
+            allocated_budget: newTask.allocated_budget,  // Include allocated_budget
+            actual_spent: newTask.actual_spent           // Include actual_spent
         };
 
         axios
@@ -194,8 +203,10 @@ function Dashboard() {
                     status: "pending",
                     priority: "low",
                     user_id: "",
-                    start_date: "", 
-                    deadline: ""     
+                    start_date: "",
+                    deadline: "",
+                    allocated_budget: "",  // Reset allocated_budget
+                    actual_spent: ""       // Reset actual_spent
                 });
             })
             .catch((error) => {
@@ -203,6 +214,7 @@ function Dashboard() {
                 alert("Failed to add task");
             });
     };
+
 
     // Handle editing an existing task
     const handleEditTask = (task) => {
@@ -213,8 +225,10 @@ function Dashboard() {
             status: task.status,
             priority: task.priority,
             user_id: task.user_id,
-            start_date: task.start_date, // Load existing start_date
-            deadline: task.deadline      // Load existing deadline
+            start_date: task.start_date,
+            deadline: task.deadline,
+            allocated_budget: task.allocated_budget ?? "",  // Populate allocated_budget
+            actual_spent: task.actual_spent ?? ""           // Populate actual_spent
         });
         setEditTaskModalShow(true);
     };
@@ -224,34 +238,37 @@ function Dashboard() {
         e.preventDefault();
         const token = localStorage.getItem("token");
 
-        // Add start_date and deadline to the updated task data
         const taskData = {
             ...newTask,
-            start_date: newTask.start_date, // Ensure the start date is included
-            deadline: newTask.deadline      // Ensure the deadline is included
+            start_date: newTask.start_date,
+            deadline: newTask.deadline,
+            allocated_budget: newTask.allocated_budget,  // Include allocated_budget
+            actual_spent: newTask.actual_spent           // Include actual_spent
         };
 
         axios.put(`http://127.0.0.1:8000/api/projects/${selectedProject}/tasks/${editingTask.id}`, taskData, {
             headers: { Authorization: `Bearer ${token}` }
         })
-            .then((res) => {
-                setTasks(tasks.map((t) => (t.id === editingTask.id ? res.data : t)));
-                setEditTaskModalShow(false);
-                setNewTask({
-                    title: "",
-                    description: "",
-                    status: "pending",
-                    priority: "low",
-                    user_id: "",
-                    start_date: "",  // Reset start_date field
-                    deadline: ""     // Reset deadline field
-                });
-                setEditingTask(null);
-            })
-            .catch((err) => {
-                console.error("Error updating task:", err);
-                alert("Failed to update task");
+        .then((res) => {
+            setTasks(tasks.map((t) => (t.id === editingTask.id ? res.data : t)));
+            setEditTaskModalShow(false);
+            setNewTask({
+                title: "",
+                description: "",
+                status: "pending",
+                priority: "low",
+                user_id: "",
+                start_date: "",
+                deadline: "",
+                allocated_budget: "",  // Reset allocated_budget
+                actual_spent: ""       // Reset actual_spent
             });
+            setEditingTask(null);
+        })
+        .catch((err) => {
+            console.error("Error updating task:", err);
+            alert( "Failed to update task: " + err.response.data.error);
+        });
     };
 
 
@@ -447,6 +464,22 @@ function Dashboard() {
                                 onChange={(e) => setNewTask({ ...newTask, deadline: e.target.value })}
                             />
                         </Form.Group>
+                        <Form.Group className="mb-3" controlId="formAllocatedBudget">
+                            <Form.Label>Allocated Budget</Form.Label>
+                            <Form.Control
+                                type="number"
+                                value={newTask.allocated_budget}
+                                onChange={(e) => setNewTask({ ...newTask, allocated_budget: e.target.value })}
+                            />
+                        </Form.Group>
+                        <Form.Group className="mb-3" controlId="formActualSpent">
+                            <Form.Label>Actual Spent</Form.Label>
+                            <Form.Control
+                                type="number"
+                                value={newTask.actual_spent}
+                                onChange={(e) => setNewTask({ ...newTask, actual_spent: e.target.value })}
+                            />
+                        </Form.Group>
                         <Button variant="primary" type="submit">
                             Save Task
                         </Button>
@@ -457,99 +490,121 @@ function Dashboard() {
 
             {/* Modal for Editing Task */}
             <Modal show={editTaskModalShow} onHide={() => setEditTaskModalShow(false)} centered>
-                <Modal.Header closeButton>
-                    <Modal.Title>Edit Task</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Form onSubmit={handleUpdateTask}>
-                        <Form.Group className="mb-3" controlId="formTitle">
-                            <Form.Label>Task Title</Form.Label>
-                            <Form.Control
-                                type="text"
-                                value={newTask.title}
-                                onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
-                                required
-                            />
-                        </Form.Group>
-                        <Form.Group className="mb-3" controlId="formDescription">
-                            <Form.Label>Description</Form.Label>
-                            <Form.Control
-                                as="textarea"
-                                value={newTask.description}
-                                onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
-                            />
-                        </Form.Group>
-                        <Form.Group className="mb-3" controlId="formStatus">
-                            <Form.Label>Status</Form.Label>
-                            <Form.Control
-                                as="select"
-                                value={newTask.status}
-                                onChange={(e) => setNewTask({ ...newTask, status: e.target.value })}
-                            >
-                                <option value="pending">Pending</option>
-                                <option value="in progress">In Progress</option>
-                                <option value="completed">Completed</option>
-                            </Form.Control>
-                        </Form.Group>
-                        <Form.Group className="mb-3" controlId="formPriority">
-                            <Form.Label>Priority</Form.Label>
-                            <Form.Control
-                                as="select"
-                                value={newTask.priority}
-                                onChange={(e) => setNewTask({ ...newTask, priority: e.target.value })}
-                            >
-                                <option value="low">Low</option>
-                                <option value="medium">Medium</option>
-                                <option value="high">High</option>
-                            </Form.Control>
-                        </Form.Group>
-                        <Form.Group className="mb-3" controlId="formUser">
-                            <Form.Label>Assign To</Form.Label>
-                            <Form.Control
-                                as="select"
-                                value={newTask.user_id}
-                                onChange={(e) => setNewTask({ ...newTask, user_id: e.target.value })}
-                            >
-                                <option value="">Select User</option>
-                                {users
-                                    .filter(user => user.role === "Team Member") // Filter users by role
-                                    .map(user => (
-                                        <option key={user.id} value={user.id}>{user.name}</option>
-                                    ))}
-                            </Form.Control>
-                        </Form.Group>
-                        {/* Edit Start Date */}
-                        <Form.Group className="mb-3" controlId="formStartDate">
-                            <Form.Label>Start Date</Form.Label>
-                            <Form.Control
-                                type="date"
-                                value={newTask.start_date}
-                                onChange={(e) => setNewTask({ ...newTask, start_date: e.target.value })}
-                            />
-                        </Form.Group>
-                        {/* Edit Deadline */}
-                        <Form.Group className="mb-3" controlId="formDeadline">
-                            <Form.Label>Deadline</Form.Label>
-                            <Form.Control
-                                type="date"
-                                value={newTask.deadline}
-                                onChange={(e) => setNewTask({ ...newTask, deadline: e.target.value })}
-                            />
-                        </Form.Group>
-                        <Button variant="primary" type="submit">
-                            Update Task
-                        </Button>
-                    </Form>
-                </Modal.Body>
-            </Modal>
+            <Modal.Header closeButton>
+                <Modal.Title>Edit Task</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                <Form onSubmit={handleUpdateTask}>
+                    <Form.Group className="mb-3" controlId="formTitle">
+                        <Form.Label>Task Title</Form.Label>
+                        <Form.Control
+                            type="text"
+                            value={newTask.title}
+                            onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
+                            required
+                        />
+                    </Form.Group>
+                    <Form.Group className="mb-3" controlId="formDescription">
+                        <Form.Label>Description</Form.Label>
+                        <Form.Control
+                            as="textarea"
+                            value={newTask.description}
+                            onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
+                        />
+                    </Form.Group>
+                    <Form.Group className="mb-3" controlId="formStatus">
+                        <Form.Label>Status</Form.Label>
+                        <Form.Control
+                            as="select"
+                            value={newTask.status}
+                            onChange={(e) => setNewTask({ ...newTask, status: e.target.value })}
+                        >
+                            <option value="pending">Pending</option>
+                            <option value="in progress">In Progress</option>
+                            <option value="completed">Completed</option>
+                        </Form.Control>
+                    </Form.Group>
+                    <Form.Group className="mb-3" controlId="formPriority">
+                        <Form.Label>Priority</Form.Label>
+                        <Form.Control
+                            as="select"
+                            value={newTask.priority}
+                            onChange={(e) => setNewTask({ ...newTask, priority: e.target.value })}
+                        >
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                        </Form.Control>
+                    </Form.Group>
+                    <Form.Group className="mb-3" controlId="formUser">
+                        <Form.Label>Assign To</Form.Label>
+                        <Form.Control
+                            as="select"
+                            value={newTask.user_id}
+                            onChange={(e) => setNewTask({ ...newTask, user_id: e.target.value })}
+                        >
+                            <option value="">Select User</option>
+                            {users
+                                .filter(user => user.role === "Team Member") // Filter users by role
+                                .map(user => (
+                                    <option key={user.id} value={user.id}>{user.name}</option>
+                                ))}
+                        </Form.Control>
+                    </Form.Group>
+                    {/* Edit Start Date */}
+                    <Form.Group className="mb-3" controlId="formStartDate">
+                        <Form.Label>Start Date</Form.Label>
+                        <Form.Control
+                            type="date"
+                            value={newTask.start_date}
+                            onChange={(e) => setNewTask({ ...newTask, start_date: e.target.value })}
+                        />
+                    </Form.Group>
+                    {/* Edit Deadline */}
+                    <Form.Group className="mb-3" controlId="formDeadline">
+                        <Form.Label>Deadline</Form.Label>
+                        <Form.Control
+                            type="date"
+                            value={newTask.deadline}
+                            onChange={(e) => setNewTask({ ...newTask, deadline: e.target.value })}
+                        />
+                    </Form.Group>
+                    {/* Edit Allocated Budget */}
+                    <Form.Group className="mb-3" controlId="formAllocatedBudget">
+                        <Form.Label>Allocated Budget</Form.Label>
+                        <Form.Control
+                            type="number"
+                            value={newTask.allocated_budget}
+                            onChange={(e) => setNewTask({ ...newTask, allocated_budget: e.target.value })}
+                        />
+                    </Form.Group>
+                    {/* Edit Actual Spent */}
+                    <Form.Group className="mb-3" controlId="formActualSpent">
+                        <Form.Label>Actual Spent</Form.Label>
+                        <Form.Control
+                            type="number"
+                            value={newTask.actual_spent}
+                            onChange={(e) => setNewTask({ ...newTask, actual_spent: e.target.value })}
+                        />
+                    </Form.Group>
+                    <Button variant="primary" type="submit">
+                        Update Task
+                    </Button>
+                </Form>
+            </Modal.Body>
+        </Modal>
 
 
             {/* Projects List */}
             <Projects
                 projects={projects}
-                onProjectClick={handleProjectClick}
+                onProjectClick={(project) => {
+                    setSelectedProjectId(project.id);        // Set the selected ID
+                    handleProjectClick(project);             // Keep your existing logic
+                }}
                 onEditProject={handleEditProject}
                 onDeleteProject={handleDeleteProject}
+                selectedProjectId={selectedProjectId}
             />
 
             {/* Tasks List */}

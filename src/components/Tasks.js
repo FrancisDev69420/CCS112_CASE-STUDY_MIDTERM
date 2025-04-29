@@ -11,35 +11,59 @@ function Tasks({ tasks = [], onEditTask, onDeleteTask }) {
                         <th>Status</th>
                         <th>Priority</th>
                         <th>Assigned to</th>
-                        <th>Start Date</th> {/* New column for Start Date */}
-                        <th>Deadline</th> {/* New column for Deadline */}
-                        <th>Actions</th> {/* New column for actions */}
+                        <th>Start Date</th>
+                        <th>Deadline</th>
+                        <th>Allocated Budget</th> {/* New Column */}
+                        <th>Actual Spent</th> {/* New Column */}
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     {tasks.length > 0 ? (
                         tasks.map((task, i) => (
                             <tr key={i}>
-                                <td>{task.title}</td> {/* Display the task title */}
-                                <td>{task.description}</td> {/* Display the task description */}
-                                <td>{task.status}</td> {/* Display the status */}
-                                <td>{task.priority}</td> {/* Display the priority */}
-                                <td>{task.user ? task.user.name : 'Not assigned'}</td> {/* Display the assigned user */}
-                                <td>{task.start_date ? new Date(task.start_date).toLocaleDateString() : 'N/A'}</td> {/* Display Start Date */}
-                                <td>{task.deadline ? new Date(task.deadline).toLocaleDateString() : 'N/A'}</td> {/* Display Deadline */}
+                                <td>{task.title}</td>
+                                <td>{task.description}</td>
+                                <td>{task.status}</td>
+                                <td>{task.priority}</td>
+                                <td>{task.user ? task.user.name : 'Not assigned'}</td>
+                                <td>{task.start_date ? new Date(task.start_date).toLocaleDateString() : 'N/A'}</td>
+                                <td>{task.deadline ? new Date(task.deadline).toLocaleDateString() : 'N/A'}</td>
                                 <td>
-                                    <button onClick={() => onEditTask(task)} className="btn btn-primary btn-sm me-2">
+                                    {task.allocated_budget != null
+                                        ? new Intl.NumberFormat('en-PH', {
+                                              style: 'currency',
+                                              currency: 'PHP',
+                                          }).format(task.allocated_budget)
+                                        : '₱0.00'}
+                                </td>
+                                <td>
+                                    {task.actual_spent != null
+                                        ? new Intl.NumberFormat('en-PH', {
+                                              style: 'currency',
+                                              currency: 'PHP',
+                                          }).format(task.actual_spent)
+                                        : '₱0.00'}
+                                </td>
+                                <td>
+                                    <button
+                                        onClick={() => onEditTask(task)}
+                                        className="btn btn-primary btn-sm me-2"
+                                    >
                                         Edit
                                     </button>
-                                    <button onClick={() => onDeleteTask(task.id)} className="btn btn-danger btn-sm ml-2">
+                                    <button
+                                        onClick={() => onDeleteTask(task.id)}
+                                        className="btn btn-danger btn-sm"
+                                    >
                                         Delete
                                     </button>
-                                </td> {/* Action buttons */}
+                                </td>
                             </tr>
                         ))
                     ) : (
                         <tr>
-                            <td colSpan="8" className="text-center">No tasks available</td> {/* Adjusted colSpan for the new columns */}
+                            <td colSpan="10" className="text-center">No tasks available</td>
                         </tr>
                     )}
                 </tbody>
