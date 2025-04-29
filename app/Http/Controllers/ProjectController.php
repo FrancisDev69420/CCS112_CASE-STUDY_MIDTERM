@@ -10,6 +10,9 @@ class ProjectController extends Controller
     public function index()
     {
         return response()->json(Project::all());
+
+        // Include remaining_budget in the response
+        return response()->json($projects);
     }
 
     public function store(Request $request)
@@ -27,6 +30,17 @@ class ProjectController extends Controller
 
             // Create the project with all the validated data
             $project = Project::create($request->all());
+
+            // Calculate the total allocated budget from tasks
+            $totalAllocated = $project->tasks->sum('allocated_budget');
+
+            // Calculate the remaining budget
+            $remainingBudget = $project->budget - $totalAllocated;
+
+            // Update the remaining_budget field
+            $project->remaining_budget = $remainingBudget;
+            $project->save();
+
             return response()->json($project, 201);
 
         } catch (\Exception $e) {
@@ -45,7 +59,7 @@ class ProjectController extends Controller
         return response()->json($project);
     }
 
-    public function update(Request $request, $id)
+   public function update(Request $request, $id)
     {
         try {
             $project = Project::findOrFail($id);
@@ -62,6 +76,17 @@ class ProjectController extends Controller
 
             // Update the project with the new data
             $project->update($request->all());
+
+            // Recalculate the total allocated budget
+            $totalAllocated = $project->tasks->sum('allocated_budget');
+
+            // Calculate the remaining budget
+            $remainingBudget = $project->budget - $totalAllocated;
+
+            // Update the remaining_budget field
+            $project->remaining_budget = $remainingBudget;
+            $project->save();
+
             return response()->json($project);
 
         } catch (\Exception $e) {

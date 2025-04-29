@@ -60,8 +60,12 @@ class TaskController extends Controller
 
         $task->save();
 
+        // Update the remaining_budget after the task is saved
+        $this->updateRemainingBudget($projectId);
+
         return response()->json($task->load('user'), 201);
     }
+
 
     // Show a single task with user info
     public function show($projectId, $taskId)
@@ -107,6 +111,7 @@ class TaskController extends Controller
 
         $newAllocation = $request->allocated_budget ?? $task->allocated_budget;
 
+        // Check if allocated budget exceeds the project budget
         if (($totalAllocated + $newAllocation) > $task->project->budget) {
             return response()->json(['error' => 'Budget allocation exceeds project total budget.'], 400);
         }
@@ -117,6 +122,9 @@ class TaskController extends Controller
         if ($task->actual_spent > $task->allocated_budget) {
             return response()->json(['error' => 'Actual spent cannot exceed allocated budget.'], 400);
         }
+
+        // Update the remaining_budget after the task is updated
+        $this->updateRemainingBudget($projectId);
 
         return response()->json($task->load('user'));
     }
@@ -130,4 +138,20 @@ class TaskController extends Controller
 
         return response()->json(['message' => 'Task deleted successfully']);
     }
+
+    protected function updateRemainingBudget($projectId)
+    {
+        $project = Project::findOrFail($projectId);
+
+        // Calculate total allocated budget for the project
+        $totalAllocated = Task::where('project_id', $projectId)->sum('allocated_budget');
+
+        // Calculate remaining budget
+        $remainingBudget = $project->budget - $totalAllocated;
+
+        // Update the remaining_budget field
+        $project->remaining_budget = $remainingBudget;
+        $project->save();
+    }
+
 }
