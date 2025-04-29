@@ -26,6 +26,24 @@ Route::middleware('auth:sanctum')->get('/dashboard', function (Request $request)
     ]);
 });
 
+// Member Dashboard Route
+Route::middleware('auth:sanctum')->get('/Member-Dashboard', function (Request $request) {
+    $user = $request->user();
+
+    $projects = Project::whereHas('tasks', function ($query) use ($user) {
+            $query->where('user_id', $user->id);
+        })
+        ->with(['tasks' => function ($query) use ($user) {
+            $query->where('user_id', $user->id);
+        }])
+        ->get();
+
+    return response()->json([
+        'message' => 'Welcome ' . $user->name,
+        'projects' => $projects
+    ]);
+});
+
 // Protected Routes (Requires Authentication)
 Route::middleware('auth:sanctum')->group(function () {
 

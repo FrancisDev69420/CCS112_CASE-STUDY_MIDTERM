@@ -35,6 +35,8 @@ class TaskController extends Controller
                     }
                 }
             ],
+            'start_date' => 'nullable|date',   // Add validation for start_date
+            'deadline' => 'nullable|date',     // Add validation for deadline
         ]);
 
         $task = new Task($request->all());
@@ -73,6 +75,8 @@ class TaskController extends Controller
                     }
                 }
             ],
+            'start_date' => 'nullable|date',   // Add validation for start_date
+            'deadline' => 'nullable|date',     // Add validation for deadline
         ]);
 
         $task = Task::where('project_id', $projectId)->findOrFail($taskId);
