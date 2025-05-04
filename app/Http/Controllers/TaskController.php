@@ -39,6 +39,8 @@ class TaskController extends Controller
             ],
             'start_date' => 'nullable|date',
             'deadline' => 'nullable|date',
+            'estimated_hours' => 'nullable|numeric|min:0',
+            'actual_hours' => 'nullable|numeric|min:0',
         ]);
 
         $project = Project::findOrFail($projectId);
@@ -100,6 +102,8 @@ class TaskController extends Controller
             ],
             'start_date' => 'nullable|date',
             'deadline' => 'nullable|date',
+            'estimated_hours' => 'nullable|numeric|min:0',
+            'actual_hours' => 'nullable|numeric|min:0',
         ]);
 
         $task = Task::where('project_id', $projectId)->findOrFail($taskId);

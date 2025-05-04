@@ -51,6 +51,7 @@ class ProjectController extends Controller
     public function show($id)
     {
         $project = Project::find($id);
+        $project = Project::with('tasks')->findOrFail($id);
 
         if (!$project) {
             return response()->json(['error' => 'Project not found'], 404);
