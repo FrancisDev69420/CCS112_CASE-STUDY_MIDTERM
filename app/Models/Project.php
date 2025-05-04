@@ -15,4 +15,9 @@ class Project extends Model
     {
         return $this->hasMany(Task::class);
     }
+
+    public function expenditures()
+    {
+        return $this->hasMany(Expenditure::class);
+    }
 }

@@ -7,6 +7,7 @@ use App\Http\Controllers\TaskController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use App\Models\Project;
+use App\Http\Controllers\ExpenditureController;
 
 Route::middleware('auth:sanctum')->get('/users', [UserController::class, 'index']); // Fetch all users
 
@@ -60,5 +61,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/projects/{projectId}/tasks/{taskId}', [TaskController::class, 'show']); // Get a single task
     Route::put('/projects/{projectId}/tasks/{taskId}', [TaskController::class, 'update']); // Update a task
     Route::delete('/projects/{projectId}/tasks/{taskId}', [TaskController::class, 'destroy']); // Delete a task
+
+    // Expenditure routes
+    Route::get('/projects/{projectId}/expenditures', [ExpenditureController::class, 'index']);
+    Route::post('/projects/{projectId}/expenditures', [ExpenditureController::class, 'store']);
+    Route::get('/projects/{projectId}/expenditures/{expenditureId}', [ExpenditureController::class, 'show']);
+    Route::put('/projects/{projectId}/expenditures/{expenditureId}', [ExpenditureController::class, 'update']);
+    Route::delete('/projects/{projectId}/expenditures/{expenditureId}', [ExpenditureController::class, 'destroy']);
 
 });
