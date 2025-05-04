@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom"; // Import useNavigate from react-router-dom
 
-function Projects({ projects, onProjectClick, onEditProject, onDeleteProject, selectedProjectId }) {
+function Projects({ projects, onProjectClick, onEditProject, onDeleteProject, selectedProjectId, onViewExpenditures }) {
     const navigate = useNavigate(); // Initialize navigate function from React Router
 
     const handleViewGanttChart = (projectId) => {
@@ -42,7 +42,7 @@ function Projects({ projects, onProjectClick, onEditProject, onDeleteProject, se
                                         e.stopPropagation();
                                         onEditProject(project);
                                     }}
-                                    className="btn btn-warning me-2"
+                                    className="btn btn-warning btn-sm me-2"
                                 >
                                     Edit
                                 </button>
@@ -51,7 +51,7 @@ function Projects({ projects, onProjectClick, onEditProject, onDeleteProject, se
                                         e.stopPropagation();
                                         onDeleteProject(project.id);
                                     }}
-                                    className="btn btn-danger me-2"
+                                    className="btn btn-danger btn-sm me-2"
                                 >
                                     Delete
                                 </button>
@@ -60,9 +60,18 @@ function Projects({ projects, onProjectClick, onEditProject, onDeleteProject, se
                                         e.stopPropagation();
                                         handleViewGanttChart(project.id); // Call the function on button click
                                     }}
-                                    className="btn btn-info"
+                                    className="btn btn-info btn-sm me-2"
                                 >
-                                    View Gantt Chart
+                                    Gantt
+                                </button>
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onViewExpenditures(project);
+                                    }}
+                                    className="btn btn-success btn-sm"
+                                >
+                                    Expenses
                                 </button>
                             </td>
                         </tr>

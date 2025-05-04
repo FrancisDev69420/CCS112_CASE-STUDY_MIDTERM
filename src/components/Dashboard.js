@@ -3,6 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Projects from "./Projects";
 import Tasks from "./Tasks";
+import ExpenditureManagement from "./ExpenditureManagement";
 import logo from "../assets/klick logo.png";
 import { Modal, Button, Form } from 'react-bootstrap';
 
@@ -31,6 +32,8 @@ function Dashboard() {
     });
     const [editingTask, setEditingTask] = useState(null);
     const [users, setUsers] = useState([]);
+    const [showExpenditureModal, setShowExpenditureModal] = useState(false);
+    const [selectedProjectForExpenditure, setSelectedProjectForExpenditure] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -452,6 +455,11 @@ function Dashboard() {
         }
     };
 
+    const handleViewExpenditures = (project) => {
+        setSelectedProjectForExpenditure(project);
+        setShowExpenditureModal(true);
+    };
+
     return (
         <div className="container mt-5">
             <img src={logo} alt="Logo" className="mb-3" style={{ width: "auto", height: "100px" }} />
@@ -824,17 +832,17 @@ function Dashboard() {
             </Modal.Body>
         </Modal>
 
-
             {/* Projects List */}
             <Projects
                 projects={projects}
                 onProjectClick={(project) => {
-                    setSelectedProjectId(project.id);        // Set the selected ID
-                    handleProjectClick(project);             // Keep your existing logic
+                    setSelectedProjectId(project.id);
+                    handleProjectClick(project);
                 }}
                 onEditProject={handleEditProject}
                 onDeleteProject={handleDeleteProject}
                 selectedProjectId={selectedProjectId}
+                onViewExpenditures={handleViewExpenditures}
             />
 
             {/* Tasks List */}
@@ -849,6 +857,27 @@ function Dashboard() {
                     />
                 </div>
             )}
+
+            {/* Expenditure Modal */}
+            <Modal 
+                show={showExpenditureModal} 
+                onHide={() => setShowExpenditureModal(false)}
+                size="lg"
+            >
+                <Modal.Header closeButton>
+                    <Modal.Title>
+                        Expenditures - {selectedProjectForExpenditure?.title}
+                    </Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    {selectedProjectForExpenditure && (
+                        <ExpenditureManagement
+                            project={selectedProjectForExpenditure}
+                            onUpdate={refreshProjects}
+                        />
+                    )}
+                </Modal.Body>
+            </Modal>
         </div>
     );
 }

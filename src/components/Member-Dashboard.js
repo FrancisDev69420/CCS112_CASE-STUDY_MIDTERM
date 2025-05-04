@@ -12,8 +12,6 @@ function MemberDashboard() {
     const [showStatusModal, setShowStatusModal] = useState(false);
     const [currentTask, setCurrentTask] = useState(null);
     const [newStatus, setNewStatus] = useState("");
-    const [newAllocatedBudget, setNewAllocatedBudget] = useState(0);
-    const [newActualSpent, setNewActualSpent] = useState(0);
     const [newActualHours, setNewActualHours] = useState(0);
     const [currentProjectId, setCurrentProjectId] = useState(null);
     const navigate = useNavigate();
@@ -74,8 +72,6 @@ function MemberDashboard() {
         setCurrentProjectId(projectId);
         setCurrentTask(task);
         setNewStatus(task.status);
-        setNewAllocatedBudget(task.allocated_budget || 0);
-        setNewActualSpent(task.actual_spent || 0);
         setNewActualHours(task.actual_hours || 0);
         setShowStatusModal(true);
     };
@@ -103,9 +99,7 @@ function MemberDashboard() {
                     user_id: currentTask.user_id,
                     start_date: currentTask.start_date,
                     deadline: currentTask.deadline,
-                    actual_hours: newActualHours,
-                    allocated_budget: newAllocatedBudget,
-                    actual_spent: newActualSpent
+                    actual_hours: newActualHours
                 },
                 { headers: { Authorization: `Bearer ${token}` } }
             )
@@ -118,8 +112,6 @@ function MemberDashboard() {
                             task.id === currentTask.id ? {
                                 ...task, 
                                 status: newStatus,
-                                allocated_budget: newAllocatedBudget,
-                                actual_spent: newActualSpent,
                                 actual_hours: newActualHours
                             } : task
                         );
@@ -127,7 +119,6 @@ function MemberDashboard() {
                 });
                 setProjects(updatedProjects);
                 setShowStatusModal(false);
-                
             })
             .catch(error => {
                 console.error("Error updating task:", error);
@@ -185,8 +176,6 @@ function MemberDashboard() {
                                                     <th>Deadline</th>
                                                     <th>Estimated Hours</th>
                                                     <th>Actual Hours</th>
-                                                    <th>Allocated Budget</th>
-                                                    <th>Actual Spent</th>
                                                     <th>Progress</th>
                                                     <th>Actions</th>
                                                 </tr>
@@ -216,26 +205,10 @@ function MemberDashboard() {
                                                                 {task.priority}
                                                             </span>
                                                         </td>
-                                                        <td>{task.start_date ? task.start_date : "N/A"}</td>
-                                                        <td>{task.deadline ? task.deadline : "N/A"}</td>
+                                                        <td>{task.start_date ? new Date(task.start_date).toLocaleDateString() : "N/A"}</td>
+                                                        <td>{task.deadline ? new Date(task.deadline).toLocaleDateString() : "N/A"}</td>
                                                         <td>{task.estimated_hours != null ? task.estimated_hours : "N/A"}</td>
                                                         <td>{task.actual_hours != null ? task.actual_hours : "N/A"}</td>
-                                                        <td>
-                                                            {task.allocated_budget != null
-                                                                ? new Intl.NumberFormat('en-PH', {
-                                                                    style: 'currency',
-                                                                    currency: 'PHP',
-                                                                }).format(task.allocated_budget)
-                                                                : '₱0.00'}
-                                                        </td>
-                                                        <td>
-                                                            {task.actual_spent != null
-                                                                ? new Intl.NumberFormat('en-PH', {
-                                                                    style: 'currency',
-                                                                    currency: 'PHP',
-                                                                }).format(task.actual_spent)
-                                                                : '₱0.00'}
-                                                        </td>
                                                         <td>
                                                             <div className="progress">
                                                                 <div 
@@ -251,16 +224,12 @@ function MemberDashboard() {
                                                             </div>
                                                         </td>
                                                         <td>
-                                                            <Button 
-                                                                variant="outline-success" 
-                                                                size="sm"
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    openStatusModal(project.id, task);
-                                                                }}
+                                                            <button
+                                                                className="btn btn-success btn-sm"
+                                                                onClick={() => openStatusModal(project.id, task)}
                                                             >
-                                                                Update
-                                                            </Button>
+                                                                Update Status
+                                                            </button>
                                                         </td>
                                                     </tr>
                                                 ))}
@@ -296,24 +265,6 @@ function MemberDashboard() {
                                         <option value="completed">Completed</option>
                                     </Form.Control>
                                 </Form.Group>
-                                {/* Edit Allocated Budget */}
-                                <Form.Group className="mb-3" controlId="formAllocatedBudget">
-                                    <Form.Label>Allocated Budget</Form.Label>
-                                    <Form.Control
-                                        type="number"
-                                        value={newAllocatedBudget}
-                                        onChange={(e) => setNewAllocatedBudget(parseFloat(e.target.value) || 0)}
-                                    />
-                                </Form.Group>
-                                {/* Edit Actual Spent */}
-                                <Form.Group className="mb-3" controlId="formActualSpent">
-                                    <Form.Label>Actual Spent</Form.Label>
-                                    <Form.Control
-                                        type="number"
-                                        value={newActualSpent}
-                                        onChange={(e) => setNewActualSpent(parseFloat(e.target.value) || 0)}
-                                    />
-                                </Form.Group>
                                 <Form.Group className="mb-3" controlId="formActualHours">
                                     <Form.Label>Actual Hours</Form.Label>
                                     <Form.Control
@@ -328,7 +279,6 @@ function MemberDashboard() {
                                         </Form.Text>
                                     )}
                                 </Form.Group>
-
                             </Form>
                         </>
                     )}

@@ -16,8 +16,6 @@ function Tasks({ tasks = [], onEditTask, onDeleteTask }) {
                         <th>Start Date</th>
                         <th>Deadline</th>
                         <th style={{ width: '80px' }}>Estimated Hours</th>
-                        <th>Allocated Budget</th> {/* New Column */}
-                        <th>Actual Spent</th> {/* New Column */}
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -34,22 +32,6 @@ function Tasks({ tasks = [], onEditTask, onDeleteTask }) {
                                 <td>{task.deadline ? new Date(task.deadline).toLocaleDateString() : 'N/A'}</td>
                                 <td style={{ width: '80px' }}>
                                     {task.estimated_hours != null ? task.estimated_hours : 'N/A'}
-                                </td>
-                                <td>
-                                    {task.allocated_budget != null
-                                        ? new Intl.NumberFormat('en-PH', {
-                                              style: 'currency',
-                                              currency: 'PHP',
-                                          }).format(task.allocated_budget)
-                                        : '₱0.00'}
-                                </td>
-                                <td>
-                                    {task.actual_spent != null
-                                        ? new Intl.NumberFormat('en-PH', {
-                                              style: 'currency',
-                                              currency: 'PHP',
-                                          }).format(task.actual_spent)
-                                        : '₱0.00'}
                                 </td>
                                 <td>
                                     <button

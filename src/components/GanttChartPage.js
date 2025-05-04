@@ -44,21 +44,9 @@ function GanttChartPage() {
     if (!projectData) return <div className="alert alert-warning mt-3">No project found.</div>;
     
     // Prepare tasks for the Gantt chart
-    const tasks = [
-        // Project as the main bar
-        {
-            start: new Date(projectData.start_date || Date.now()),
-            end: new Date(projectData.deadline || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)), // Default 1 week ahead
-            name: projectData.title,
-            id: "project-" + projectData.id,
-            type: "project",
-            progress: 0,
-            isDisabled: true,
-            styles: { progressColor: '#ffbb54', progressSelectedColor: '#ffbb54' }
-        }
-    ];
+    const tasks = [];
     
-    // Add tasks as sub-items
+    // Add tasks
     if (projectData.tasks && projectData.tasks.length > 0) {
         projectData.tasks.forEach(task => {
             if (task.start_date && task.deadline) {
@@ -69,7 +57,6 @@ function GanttChartPage() {
                     id: task.id.toString(),
                     type: "task",
                     progress: task.status === "completed" ? 100 : (task.status === "in progress" ? 50 : 0),
-                    project: "project-" + projectData.id,
                     // Color based on priority
                     styles: { 
                         progressColor: task.priority === "high" ? '#ff0000' : 
@@ -100,7 +87,7 @@ function GanttChartPage() {
             <div className="card shadow mb-4">
                 <div className="card-body">
                     <div style={{ height: '500px' }}>
-                        {tasks.length > 1 ? (
+                        {tasks.length > 0 ? (
                             <Gantt
                                 tasks={tasks}
                                 viewMode={ViewMode.Day}
