@@ -1,7 +1,14 @@
 import React from "react";
+import { useNavigate } from "react-router-dom"; // Import useNavigate from react-router-dom
 
 function Projects({ projects, onProjectClick, onEditProject, onDeleteProject, selectedProjectId }) {
-    
+    const navigate = useNavigate(); // Initialize navigate function from React Router
+
+    const handleViewGanttChart = (projectId) => {
+        // Navigate to the Gantt chart page for the specific project
+        navigate(`/project/${projectId}/gantt`);
+    };
+
     return (
         <table className="table table-bordered">
             <thead className="table-dark">
@@ -11,8 +18,8 @@ function Projects({ projects, onProjectClick, onEditProject, onDeleteProject, se
                     <th>Description</th>
                     <th>Budget</th>
                     <th>Remaining Budget</th>
-                    <th>Start Date</th> {/* Added Start Date Column */}
-                    <th>Deadline</th> {/* Added Deadline Column */}
+                    <th>Start Date</th> 
+                    <th>Deadline</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -44,16 +51,25 @@ function Projects({ projects, onProjectClick, onEditProject, onDeleteProject, se
                                         e.stopPropagation();
                                         onDeleteProject(project.id);
                                     }}
-                                    className="btn btn-danger"
+                                    className="btn btn-danger me-2"
                                 >
                                     Delete
+                                </button>
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleViewGanttChart(project.id); // Call the function on button click
+                                    }}
+                                    className="btn btn-info"
+                                >
+                                    View Gantt Chart
                                 </button>
                             </td>
                         </tr>
                     ))
                 ) : (
                     <tr>
-                        <td colSpan="7" className="text-center">No projects available</td> 
+                        <td colSpan="8" className="text-center">No projects available</td>
                     </tr>
                 )}
             </tbody>

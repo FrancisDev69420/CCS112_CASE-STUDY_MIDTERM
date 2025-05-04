@@ -14,6 +14,7 @@ function MemberDashboard() {
     const [newStatus, setNewStatus] = useState("");
     const [newAllocatedBudget, setNewAllocatedBudget] = useState(0);
     const [newActualSpent, setNewActualSpent] = useState(0);
+    const [newActualHours, setNewActualHours] = useState(0);
     const [currentProjectId, setCurrentProjectId] = useState(null);
     const navigate = useNavigate();
 
@@ -75,6 +76,7 @@ function MemberDashboard() {
         setNewStatus(task.status);
         setNewAllocatedBudget(task.allocated_budget || 0);
         setNewActualSpent(task.actual_spent || 0);
+        setNewActualHours(task.actual_hours || 0);
         setShowStatusModal(true);
     };
 
@@ -82,6 +84,12 @@ function MemberDashboard() {
         const token = localStorage.getItem("token");
         
         if (!currentTask || !currentProjectId) return;
+
+        // Prevent saving if actual hours exceed estimated hours
+        if (newActualHours > currentTask.estimated_hours) {
+            alert("Actual hours cannot exceed estimated hours.");
+            return;
+        }
 
         axios
             .put(
@@ -95,6 +103,7 @@ function MemberDashboard() {
                     user_id: currentTask.user_id,
                     start_date: currentTask.start_date,
                     deadline: currentTask.deadline,
+                    actual_hours: newActualHours,
                     allocated_budget: newAllocatedBudget,
                     actual_spent: newActualSpent
                 },
@@ -110,7 +119,8 @@ function MemberDashboard() {
                                 ...task, 
                                 status: newStatus,
                                 allocated_budget: newAllocatedBudget,
-                                actual_spent: newActualSpent
+                                actual_spent: newActualSpent,
+                                actual_hours: newActualHours
                             } : task
                         );
                     }
@@ -123,6 +133,11 @@ function MemberDashboard() {
                 console.error("Error updating task:", error);
                 alert("Failed to update task: " + error.response.data.error);
             });
+    };
+
+    const calculateProgress = (actualHours, estimatedHours) => {
+        if (estimatedHours === 0) return 0; // Avoid division by zero
+        return (actualHours / estimatedHours) * 100; // Returns the progress in percentage
     };
 
     return (
@@ -168,8 +183,11 @@ function MemberDashboard() {
                                                     <th>Priority</th>
                                                     <th>Start Date</th>
                                                     <th>Deadline</th>
+                                                    <th>Estimated Hours</th>
+                                                    <th>Actual Hours</th>
                                                     <th>Allocated Budget</th>
                                                     <th>Actual Spent</th>
+                                                    <th>Progress</th>
                                                     <th>Actions</th>
                                                 </tr>
                                             </thead>
@@ -200,6 +218,8 @@ function MemberDashboard() {
                                                         </td>
                                                         <td>{task.start_date ? task.start_date : "N/A"}</td>
                                                         <td>{task.deadline ? task.deadline : "N/A"}</td>
+                                                        <td>{task.estimated_hours != null ? task.estimated_hours : "N/A"}</td>
+                                                        <td>{task.actual_hours != null ? task.actual_hours : "N/A"}</td>
                                                         <td>
                                                             {task.allocated_budget != null
                                                                 ? new Intl.NumberFormat('en-PH', {
@@ -215,6 +235,20 @@ function MemberDashboard() {
                                                                     currency: 'PHP',
                                                                 }).format(task.actual_spent)
                                                                 : '₱0.00'}
+                                                        </td>
+                                                        <td>
+                                                            <div className="progress">
+                                                                <div 
+                                                                    className="progress-bar" 
+                                                                    role="progressbar" 
+                                                                    style={{ width: `${calculateProgress(task.actual_hours, task.estimated_hours)}%` }}
+                                                                    aria-valuenow={calculateProgress(task.actual_hours, task.estimated_hours)}
+                                                                    aria-valuemin="0" 
+                                                                    aria-valuemax="100"
+                                                                >
+                                                                    {calculateProgress(task.actual_hours, task.estimated_hours).toFixed(2)}%
+                                                                </div>
+                                                            </div>
                                                         </td>
                                                         <td>
                                                             <Button 
@@ -280,6 +314,21 @@ function MemberDashboard() {
                                         onChange={(e) => setNewActualSpent(parseFloat(e.target.value) || 0)}
                                     />
                                 </Form.Group>
+                                <Form.Group className="mb-3" controlId="formActualHours">
+                                    <Form.Label>Actual Hours</Form.Label>
+                                    <Form.Control
+                                        type="number"
+                                        value={newActualHours}
+                                        onChange={(e) => setNewActualHours(parseFloat(e.target.value) || "")}
+                                        isInvalid={newActualHours > currentTask.estimated_hours}
+                                    />
+                                    {newActualHours > currentTask.estimated_hours && (
+                                        <Form.Text className="text-danger">
+                                            Warning: Actual hours exceed the estimated hours!
+                                        </Form.Text>
+                                    )}
+                                </Form.Group>
+
                             </Form>
                         </>
                     )}

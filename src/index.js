@@ -8,6 +8,7 @@ import Login from "./components/Login";
 import Register from "./components/Register";
 import Dashboard from "./components/Dashboard";
 import MemberDashboard from "./components/Member-Dashboard";
+import GanttChartPage from "./components/GanttChartPage";
 
 function App() {
     return (
@@ -18,6 +19,7 @@ function App() {
                     <Route path="/register" element={<Register />} />
                     <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/Member-Dashboard" element={<MemberDashboard />} />
+                    <Route path="/project/:id/gantt" element={<GanttChartPage />} />
                 </Routes>
             </Suspense>
         </Router>

@@ -25,6 +25,7 @@ function Dashboard() {
         user_id: "",
         start_date: "",
         deadline: "",
+        estimated_hours: "", // New field for estimated hours
         allocated_budget: "", // New field for allocated budget
         actual_spent: "" // New field for actual spent
     });
@@ -90,6 +91,13 @@ function Dashboard() {
     const handleAddProject = (e) => {
         e.preventDefault();
 
+        // Validate project dates
+        const validation = validateProjectDates(newProject);
+        if (!validation.isValid) {
+            alert(`Date validation failed:\n${validation.errors.join('\n')}`);
+            return; // Prevent form submission
+        }
+
         const token = localStorage.getItem("token");
         const userId = localStorage.getItem("user_id");
 
@@ -131,6 +139,13 @@ function Dashboard() {
     // Function to handle updating a project
     const handleUpdateProject = (e) => {
         e.preventDefault();
+
+        // Validate project dates
+        const validation = validateProjectDates(newProject);
+        if (!validation.isValid) {
+            alert(`Date validation failed:\n${validation.errors.join('\n')}`);
+            return; // Prevent form submission
+        }
 
         const token = localStorage.getItem("token");
         const userId = localStorage.getItem("user_id");
@@ -192,16 +207,122 @@ function Dashboard() {
             });
     };
 
+    // Date validation functions
+    const validateTaskDates = (task, projectStartDate, projectDeadline) => {
+        const errors = [];
+        
+        // Convert string dates to Date objects for comparison
+        const taskStartDate = task.start_date ? new Date(task.start_date) : null;
+        const taskDeadline = task.deadline ? new Date(task.deadline) : null;
+        const projStartDate = projectStartDate ? new Date(projectStartDate) : null;
+        const projDeadline = projectDeadline ? new Date(projectDeadline) : null;
+        
+        // Set time to midnight to compare dates only
+        if (taskStartDate) taskStartDate.setHours(0, 0, 0, 0);
+        if (taskDeadline) taskDeadline.setHours(0, 0, 0, 0);
+        if (projStartDate) projStartDate.setHours(0, 0, 0, 0);
+        if (projDeadline) projDeadline.setHours(0, 0, 0, 0);
+        
+        // If project has a start date, task start date should not be earlier
+        if (taskStartDate && projStartDate && taskStartDate < projStartDate) {
+            errors.push("Task start date cannot be earlier than project start date");
+        }
+        
+        // If project has a deadline, task deadline should not be later
+        if (taskDeadline && projDeadline && taskDeadline > projDeadline) {
+            errors.push("Task deadline cannot be later than project deadline");
+        }
+        
+        // Task deadline should not be earlier than task start date
+        if (taskStartDate && taskDeadline && taskDeadline < taskStartDate) {
+            errors.push("Task deadline cannot be earlier than task start date");
+        }
+        
+        return {
+            isValid: errors.length === 0,
+            errors
+        };
+    };
+
+    const validateProjectDates = (project) => {
+        const errors = [];
+
+        const startDate = project.start_date ? new Date(project.start_date) : null;
+        const deadline = project.deadline ? new Date(project.deadline) : null;
+
+        // Ensure start date is not after the deadline
+        if (startDate && deadline && startDate > deadline) {
+            errors.push("Start date cannot be later than the deadline.");
+        }
+
+        return {
+            isValid: errors.length === 0,
+            errors,
+        };
+    };
+
+    // Helper functions for real-time form validation
+    const getProjectDateInfo = () => {
+        const currentProject = projects.find(p => p.id === selectedProject);
+        return {
+            startDate: currentProject?.start_date || null,
+            deadline: currentProject?.deadline || null,
+            title: currentProject?.title || "selected project"
+        };
+    };
+
+
+    const isTaskStartDateValid = () => {
+        if (!newTask.start_date) return true; // Empty dates are valid
+        
+        const projectInfo = getProjectDateInfo();
+        if (!projectInfo.startDate) return true; // No project start constraint
+        
+        return new Date(newTask.start_date) >= new Date(projectInfo.startDate);
+    };
+
+    const isTaskDeadlineValid = () => {
+        if (!newTask.deadline) return true; // Empty dates are valid
+        
+        // Check task deadline vs project deadline
+        const projectInfo = getProjectDateInfo();
+        if (projectInfo.deadline && new Date(newTask.deadline) > new Date(projectInfo.deadline)) {
+            return false;
+        }
+        
+        // Check task deadline vs task start date
+        if (newTask.start_date && new Date(newTask.deadline) < new Date(newTask.start_date)) {
+            return false;
+        }
+        
+        return true;
+    };
+
     // Task modal form submit for adding a new task
     const handleAddTask = (e) => {
         e.preventDefault();
 
         const token = localStorage.getItem("token");
+        
+        // Get current project dates
+        const currentProject = projects.find(p => p.id === selectedProject);
+        const projectStartDate = currentProject?.start_date;
+        const projectDeadline = currentProject?.deadline;
+        
+        // Validate task dates against project dates
+        const validation = validateTaskDates(newTask, projectStartDate, projectDeadline);
+        
+        if (!validation.isValid) {
+            // Display validation errors
+            alert(`Date validation failed:\n${validation.errors.join('\n')}`);
+            return; // Prevent form submission
+        }
 
         const taskData = {
             ...newTask,
             start_date: newTask.start_date,
             deadline: newTask.deadline,
+            estimated_hours: newTask.estimated_hours, 
             allocated_budget: newTask.allocated_budget,
             actual_spent: newTask.actual_spent
         };
@@ -221,6 +342,7 @@ function Dashboard() {
                     user_id: "",
                     start_date: "",
                     deadline: "",
+                    estimated_hours: "", // Reset estimated hours
                     allocated_budget: "",
                     actual_spent: ""
                 });
@@ -234,7 +356,6 @@ function Dashboard() {
             });
     };
 
-
     // Handle editing an existing task
     const handleEditTask = (task) => {
         setEditingTask(task);
@@ -246,6 +367,7 @@ function Dashboard() {
             user_id: task.user_id,
             start_date: task.start_date,
             deadline: task.deadline,
+            estimated_hours: task.estimated_hours ?? "", // Populate estimated_hours
             allocated_budget: task.allocated_budget ?? "",  // Populate allocated_budget
             actual_spent: task.actual_spent ?? ""           // Populate actual_spent
         });
@@ -256,11 +378,26 @@ function Dashboard() {
     const handleUpdateTask = (e) => {
         e.preventDefault();
         const token = localStorage.getItem("token");
+        
+        // Get current project dates
+        const currentProject = projects.find(p => p.id === selectedProject);
+        const projectStartDate = currentProject?.start_date;
+        const projectDeadline = currentProject?.deadline;
+        
+        // Validate task dates against project dates
+        const validation = validateTaskDates(newTask, projectStartDate, projectDeadline);
+        
+        if (!validation.isValid) {
+            // Display validation errors
+            alert(`Date validation failed:\n${validation.errors.join('\n')}`);
+            return; // Prevent form submission
+        }
 
         const taskData = {
             ...newTask,
             start_date: newTask.start_date,
             deadline: newTask.deadline,
+            estimated_hours: newTask.estimated_hours,
             allocated_budget: newTask.allocated_budget,
             actual_spent: newTask.actual_spent
         };
@@ -279,6 +416,7 @@ function Dashboard() {
                 user_id: "",
                 start_date: "",
                 deadline: "",
+                estimated_hours: "", // Reset estimated hours
                 allocated_budget: "",
                 actual_spent: ""
             });
@@ -289,10 +427,9 @@ function Dashboard() {
         })
         .catch((err) => {
             console.error("Error updating task:", err);
-            alert("Failed to update task: " + err.response.data.error);
+            alert("Failed to update task: " + err.response?.data?.error || "Unknown error");
         });
     };
-
 
     const handleDeleteTask = (taskId) => {
         const token = localStorage.getItem("token");
@@ -354,7 +491,10 @@ function Dashboard() {
                             priority: "low",
                             user_id: "",
                             start_date: "",
-                            deadline: ""
+                            deadline: "",
+                            estimated_hours: "",
+                            allocated_budget: "",
+                            actual_spent: ""
                         });  // Reset task form fields
                         setTaskModalShow(true);
                     }}
@@ -403,15 +543,28 @@ function Dashboard() {
                                 type="date"
                                 value={newProject.start_date}
                                 onChange={(e) => setNewProject({ ...newProject, start_date: e.target.value })}
+                                isInvalid={newProject.start_date && newProject.deadline && new Date(newProject.start_date) > new Date(newProject.deadline)}
                             />
+                            {newProject.start_date && newProject.deadline && new Date(newProject.start_date) > new Date(newProject.deadline) && (
+                                <Form.Text className="text-danger">
+                                    Start date cannot be later than the deadline.
+                                </Form.Text>
+                            )}
                         </Form.Group>
+
                         <Form.Group className="mb-3" controlId="formDeadline">
                             <Form.Label>Deadline</Form.Label>
                             <Form.Control
                                 type="date"
                                 value={newProject.deadline}
                                 onChange={(e) => setNewProject({ ...newProject, deadline: e.target.value })}
+                                isInvalid={newProject.start_date && newProject.deadline && new Date(newProject.start_date) > new Date(newProject.deadline)}
                             />
+                            {newProject.start_date && newProject.deadline && new Date(newProject.start_date) > new Date(newProject.deadline) && (
+                                <Form.Text className="text-danger">
+                                    Deadline cannot be earlier than the start date.
+                                </Form.Text>
+                            )}
                         </Form.Group>
                         <Button variant="primary" type="submit">
                             {editingProject ? "Update Project" : "Save Project"}
@@ -419,8 +572,6 @@ function Dashboard() {
                     </Form>
                 </Modal.Body>
             </Modal>
-
-
 
             {/* Modal for Adding Task */}
             <Modal show={taskModalShow} onHide={() => setTaskModalShow(false)} centered>
@@ -473,22 +624,48 @@ function Dashboard() {
                                     ))}
                             </Form.Control>
                         </Form.Group>
-                        {/* Add Start Date */}
+                        {/* Add Start Date with validation */}
                         <Form.Group className="mb-3" controlId="formStartDate">
                             <Form.Label>Start Date</Form.Label>
                             <Form.Control
                                 type="date"
                                 value={newTask.start_date}
                                 onChange={(e) => setNewTask({ ...newTask, start_date: e.target.value })}
+                                isInvalid={newTask.start_date && !isTaskStartDateValid()}
                             />
+                            {newTask.start_date && !isTaskStartDateValid() && (
+                                <Form.Text className="text-danger">
+                                    Start date must be on or after project start date ({getProjectDateInfo().startDate})
+                                </Form.Text>
+                            )}
+                            <Form.Text className="text-muted">
+                                Project {getProjectDateInfo().title} starts on: {getProjectDateInfo().startDate || "No start date set"}
+                            </Form.Text>
                         </Form.Group>
-                        {/* Add Deadline */}
+                        {/* Add Deadline with validation */}
                         <Form.Group className="mb-3" controlId="formDeadline">
                             <Form.Label>Deadline</Form.Label>
                             <Form.Control
                                 type="date"
                                 value={newTask.deadline}
                                 onChange={(e) => setNewTask({ ...newTask, deadline: e.target.value })}
+                                isInvalid={newTask.deadline && !isTaskDeadlineValid()}
+                            />
+                            {newTask.deadline && !isTaskDeadlineValid() && (
+                                <Form.Text className="text-danger">
+                                    Deadline must be between task start date and project deadline
+                                </Form.Text>
+                            )}
+                            <Form.Text className="text-muted">
+                                Project {getProjectDateInfo().title} ends on: {getProjectDateInfo().deadline || "No deadline set"}
+                            </Form.Text>
+                        </Form.Group>
+                        <Form.Group className="mb-3" controlId="formEstimatedHours">
+                            <Form.Label>Estimated Hours</Form.Label>
+                            <Form.Control
+                                type="number"
+                                value={newTask.estimated_hours}
+                                onChange={(e) => setNewTask({ ...newTask, estimated_hours: e.target.value })}
                             />
                         </Form.Group>
                         <Form.Group className="mb-3" controlId="formAllocatedBudget">
@@ -513,7 +690,6 @@ function Dashboard() {
                     </Form>
                 </Modal.Body>
             </Modal>
-
 
             {/* Modal for Editing Task */}
             <Modal show={editTaskModalShow} onHide={() => setEditTaskModalShow(false)} centered>
@@ -578,22 +754,49 @@ function Dashboard() {
                                 ))}
                         </Form.Control>
                     </Form.Group>
-                    {/* Edit Start Date */}
+                    {/* Edit Start Date with validation */}
                     <Form.Group className="mb-3" controlId="formStartDate">
                         <Form.Label>Start Date</Form.Label>
                         <Form.Control
                             type="date"
                             value={newTask.start_date}
                             onChange={(e) => setNewTask({ ...newTask, start_date: e.target.value })}
+                            isInvalid={newTask.start_date && !isTaskStartDateValid()}
                         />
+                        {newTask.start_date && !isTaskStartDateValid() && (
+                            <Form.Text className="text-danger">
+                                Start date must be on or after project start date ({getProjectDateInfo().startDate})
+                            </Form.Text>
+                        )}
+                        <Form.Text className="text-muted">
+                            {getProjectDateInfo().title} starts on: {getProjectDateInfo().startDate || "No start date set"}
+                        </Form.Text>
                     </Form.Group>
-                    {/* Edit Deadline */}
+                    {/* Edit Deadline with validation */}
                     <Form.Group className="mb-3" controlId="formDeadline">
                         <Form.Label>Deadline</Form.Label>
                         <Form.Control
                             type="date"
                             value={newTask.deadline}
                             onChange={(e) => setNewTask({ ...newTask, deadline: e.target.value })}
+                            isInvalid={newTask.deadline && !isTaskDeadlineValid()}
+                        />
+                        {newTask.deadline && !isTaskDeadlineValid() && (
+                            <Form.Text className="text-danger">
+                                Deadline must be between task start date and project deadline
+                            </Form.Text>
+                        )}
+                        <Form.Text className="text-muted">
+                            {getProjectDateInfo().title} ends on: {getProjectDateInfo().deadline || "No deadline set"}
+                        </Form.Text>
+                    </Form.Group>
+                    {/* Edit Estimated Hours */}
+                    <Form.Group className="mb-3" controlId="formEstimatedHours">
+                        <Form.Label>Estimated Hours</Form.Label>
+                        <Form.Control
+                            type="number"
+                            value={newTask.estimated_hours}
+                            onChange={(e) => setNewTask({ ...newTask, estimated_hours: e.target.value })}
                         />
                     </Form.Group>
                     {/* Edit Allocated Budget */}

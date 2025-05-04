@@ -1,10 +1,12 @@
 import React from "react";
 
 function Tasks({ tasks = [], onEditTask, onDeleteTask }) {
+
+
     return (
         <div className="table-responsive">
             <table className="table table-bordered">
-                <thead>
+                <thead className="table-secondary">
                     <tr>
                         <th>Title</th>
                         <th>Description</th>
@@ -13,6 +15,7 @@ function Tasks({ tasks = [], onEditTask, onDeleteTask }) {
                         <th>Assigned to</th>
                         <th>Start Date</th>
                         <th>Deadline</th>
+                        <th style={{ width: '80px' }}>Estimated Hours</th>
                         <th>Allocated Budget</th> {/* New Column */}
                         <th>Actual Spent</th> {/* New Column */}
                         <th>Actions</th>
@@ -29,6 +32,9 @@ function Tasks({ tasks = [], onEditTask, onDeleteTask }) {
                                 <td>{task.user ? task.user.name : 'Not assigned'}</td>
                                 <td>{task.start_date ? new Date(task.start_date).toLocaleDateString() : 'N/A'}</td>
                                 <td>{task.deadline ? new Date(task.deadline).toLocaleDateString() : 'N/A'}</td>
+                                <td style={{ width: '80px' }}>
+                                    {task.estimated_hours != null ? task.estimated_hours : 'N/A'}
+                                </td>
                                 <td>
                                     {task.allocated_budget != null
                                         ? new Intl.NumberFormat('en-PH', {
