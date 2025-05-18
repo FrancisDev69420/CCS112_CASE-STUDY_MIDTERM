@@ -5,11 +5,17 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\CommentController;
 use Illuminate\Http\Request;
 use App\Models\Project;
 use App\Http\Controllers\ExpenditureController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ActivityLogController;
 
 Route::middleware('auth:sanctum')->get('/users', [UserController::class, 'index']); // Fetch all users
+Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+    return response()->json($request->user());
+}); // Fetch current user
 
 // Authentication Routes
 Route::post('/register', [AuthController::class, 'register']);
@@ -47,6 +53,12 @@ Route::middleware('auth:sanctum')->get('/Member-Dashboard', function (Request $r
 
 // Protected Routes (Requires Authentication)
 Route::middleware('auth:sanctum')->group(function () {
+    // Notification Routes
+    Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::get('/notifications/unread-count', [NotificationController::class, 'getUnreadCount']);
+    Route::post('/notifications/{id}/mark-as-read', [NotificationController::class, 'markAsRead']);
+    Route::post('/notifications/mark-all-as-read', [NotificationController::class, 'markAllAsRead']);
+    Route::delete('/notifications/{id}', [NotificationController::class, 'destroy']); // Add delete route
 
     // Project Routes
     Route::get('/projects', [ProjectController::class, 'index']);  // List all projects
@@ -62,6 +74,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/projects/{projectId}/tasks/{taskId}', [TaskController::class, 'update']); // Update a task
     Route::delete('/projects/{projectId}/tasks/{taskId}', [TaskController::class, 'destroy']); // Delete a task
 
+    // Comment routes
+    Route::get('/projects/{projectId}/tasks/{taskId}/comments', [CommentController::class, 'index']); // List all comments for a task
+    Route::post('/projects/{projectId}/tasks/{taskId}/comments', [CommentController::class, 'store']); // Create a new comment
+    Route::get('/projects/{projectId}/tasks/{taskId}/comments/{commentId}', [CommentController::class, 'show']); // Get a specific comment
+    Route::put('/projects/{projectId}/tasks/{taskId}/comments/{commentId}', [CommentController::class, 'update']); // Update a comment
+    Route::delete('/projects/{projectId}/tasks/{taskId}/comments/{commentId}', [CommentController::class, 'destroy']); // Delete a comment
+
     // Expenditure routes
     Route::get('/projects/{projectId}/expenditures', [ExpenditureController::class, 'index']);
     Route::post('/projects/{projectId}/expenditures', [ExpenditureController::class, 'store']);
@@ -69,4 +88,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/projects/{projectId}/expenditures/{expenditureId}', [ExpenditureController::class, 'update']);
     Route::delete('/projects/{projectId}/expenditures/{expenditureId}', [ExpenditureController::class, 'destroy']);
 
+    // Activity Log Routes
+    Route::get('/activities', [ActivityLogController::class, 'index']);
+    Route::get('/projects/{project}/activities', [ActivityLogController::class, 'index']);
+    Route::get('/tasks/{task}/activities', [ActivityLogController::class, 'index']);
 });

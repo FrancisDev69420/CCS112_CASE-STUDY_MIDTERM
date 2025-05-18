@@ -11,6 +11,8 @@ class Project extends Model
 
     protected $fillable = ['title', 'description', 'user_id', 'budget', 'start_date', 'deadline'];
 
+    protected $appends = ['remaining_budget'];
+
     public function tasks()
     {
         return $this->hasMany(Task::class);
@@ -19,5 +21,11 @@ class Project extends Model
     public function expenditures()
     {
         return $this->hasMany(Expenditure::class);
+    }
+
+    public function getRemainingBudgetAttribute()
+    {
+        $expenditures = $this->expenditures()->sum('amount');
+        return $this->budget - $expenditures;
     }
 }
