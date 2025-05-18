@@ -6,8 +6,26 @@ import Tasks from "./Tasks";
 import ExpenditureManagement from "./ExpenditureManagement";
 import logo from "../assets/klick logo.png";
 import { Modal, Button, Form } from 'react-bootstrap';
+import Notifications from "./Notifications"; 
 
 function Dashboard() {
+    // Date formatting utilities
+    const formatDateForDisplay = (dateString) => {
+        if (!dateString) return "N/A";
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', {
+            month: '2-digit',
+            day: '2-digit',
+            year: 'numeric'
+        });
+    };
+
+    const formatDateForInput = (dateString) => {
+        if (!dateString) return "";
+        const date = new Date(dateString);
+        return date.toISOString().split('T')[0];
+    };
+
     const [message, setMessage] = useState("");
     const [projects, setProjects] = useState([]);
     const [selectedProject, setSelectedProject] = useState(null);
@@ -17,8 +35,7 @@ function Dashboard() {
     const [editingProject, setEditingProject] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [taskModalShow, setTaskModalShow] = useState(false); // Toggle task modal visibility
-    const [editTaskModalShow, setEditTaskModalShow] = useState(false);
-    const [newTask, setNewTask] = useState({
+    const [editTaskModalShow, setEditTaskModalShow] = useState(false);    const [newTask, setNewTask] = useState({
         title: "",
         description: "",
         status: "pending",
@@ -26,13 +43,10 @@ function Dashboard() {
         user_id: "",
         start_date: "",
         deadline: "",
-        estimated_hours: "", // New field for estimated hours
-        allocated_budget: "", // New field for allocated budget
-        actual_spent: "" // New field for actual spent
+        estimated_hours: "" // New field for estimated hours
     });
     const [editingTask, setEditingTask] = useState(null);
-    const [users, setUsers] = useState([]);
-    const [showExpenditureModal, setShowExpenditureModal] = useState(false);
+    const [users, setUsers] = useState([]);    const [showExpenditureModal, setShowExpenditureModal] = useState(false);
     const [selectedProjectForExpenditure, setSelectedProjectForExpenditure] = useState(null);
     const navigate = useNavigate();
 
@@ -76,6 +90,7 @@ function Dashboard() {
         if (selectedProject === project.id) {
             setTasks([]); // Clear tasks if the same project is clicked again
             setSelectedProject(null);
+            setSelectedProjectId(null);
         } else {
             axios
                 .get(`http://127.0.0.1:8000/api/projects/${project.id}/tasks`, {
@@ -369,10 +384,7 @@ function Dashboard() {
             priority: task.priority,
             user_id: task.user_id,
             start_date: task.start_date,
-            deadline: task.deadline,
-            estimated_hours: task.estimated_hours ?? "", // Populate estimated_hours
-            allocated_budget: task.allocated_budget ?? "",  // Populate allocated_budget
-            actual_spent: task.actual_spent ?? ""           // Populate actual_spent
+            deadline: task.deadline,            estimated_hours: task.estimated_hours ?? "" // Populate estimated_hours
         });
         setEditTaskModalShow(true);
     };
@@ -462,17 +474,19 @@ function Dashboard() {
 
     return (
         <div className="container mt-5">
-            <img src={logo} alt="Logo" className="mb-3" style={{ width: "auto", height: "100px" }} />
+            <div className="d-flex justify-content-between align-items-center">
+                <img src={logo} alt="Logo" className="mb-3" style={{ width: "auto", height: "100px" }} />
+                <div className="d-flex align-items-center gap-3">
+                    <Notifications />
+                    <button className="btn btn-danger" onClick={handleLogout}>Logout</button>
+                </div>
+            </div>
             
             <h2 className="text-center">Dashboard</h2>
-            <p className="text-muted text-center">{message}</p>
-
-            <div className="d-flex justify-content-end">
-                <button className="btn btn-danger" onClick={handleLogout}>Logout</button>
-            </div>
-
-            {/* Add Project Button */}
-            <div className="d-flex justify-content-start mb-3">
+            <p className="text-muted text-center">{message}</p>            
+            
+            {/* Project Buttons */}
+            <div className="d-flex justify-content-between mb-3">
                 <Button 
                     variant="success" 
                     onClick={() => {
@@ -482,6 +496,13 @@ function Dashboard() {
                     }}
                 >
                     Add Project
+                </Button>
+                
+                <Button
+                    variant="info"
+                    onClick={() => navigate('/activities')}
+                >
+                    View Activity Feed
                 </Button>
             </div>
 
@@ -546,12 +567,13 @@ function Dashboard() {
                             />
                         </Form.Group>
                         <Form.Group className="mb-3" controlId="formStartDate">
-                            <Form.Label>Start Date</Form.Label>
+                            <Form.Label>Start Date</Form.Label>                            
                             <Form.Control
                                 type="date"
-                                value={newProject.start_date}
+                                value={formatDateForInput(newProject.start_date)}
                                 onChange={(e) => setNewProject({ ...newProject, start_date: e.target.value })}
                                 isInvalid={newProject.start_date && newProject.deadline && new Date(newProject.start_date) > new Date(newProject.deadline)}
+                                placeholder="MM/DD/YYYY"
                             />
                             {newProject.start_date && newProject.deadline && new Date(newProject.start_date) > new Date(newProject.deadline) && (
                                 <Form.Text className="text-danger">
@@ -561,12 +583,13 @@ function Dashboard() {
                         </Form.Group>
 
                         <Form.Group className="mb-3" controlId="formDeadline">
-                            <Form.Label>Deadline</Form.Label>
+                            <Form.Label>Deadline</Form.Label>                            
                             <Form.Control
                                 type="date"
-                                value={newProject.deadline}
+                                value={formatDateForInput(newProject.deadline)}
                                 onChange={(e) => setNewProject({ ...newProject, deadline: e.target.value })}
                                 isInvalid={newProject.start_date && newProject.deadline && new Date(newProject.start_date) > new Date(newProject.deadline)}
+                                placeholder="MM/DD/YYYY"
                             />
                             {newProject.start_date && newProject.deadline && new Date(newProject.start_date) > new Date(newProject.deadline) && (
                                 <Form.Text className="text-danger">
@@ -631,41 +654,39 @@ function Dashboard() {
                                         <option key={user.id} value={user.id}>{user.name}</option>
                                     ))}
                             </Form.Control>
-                        </Form.Group>
-                        {/* Add Start Date with validation */}
+                        </Form.Group>                        {/* Add Start Date with validation */}
                         <Form.Group className="mb-3" controlId="formStartDate">
                             <Form.Label>Start Date</Form.Label>
                             <Form.Control
                                 type="date"
-                                value={newTask.start_date}
+                                value={formatDateForInput(newTask.start_date)}
                                 onChange={(e) => setNewTask({ ...newTask, start_date: e.target.value })}
                                 isInvalid={newTask.start_date && !isTaskStartDateValid()}
+                                placeholder="MM/DD/YYYY"
                             />
                             {newTask.start_date && !isTaskStartDateValid() && (
                                 <Form.Text className="text-danger">
                                     Start date must be on or after project start date ({getProjectDateInfo().startDate})
                                 </Form.Text>
-                            )}
-                            <Form.Text className="text-muted">
-                                Project {getProjectDateInfo().title} starts on: {getProjectDateInfo().startDate || "No start date set"}
+                            )}                            <Form.Text className="text-muted">
+                                Project {getProjectDateInfo().title} starts on: {getProjectDateInfo().startDate ? formatDateForDisplay(getProjectDateInfo().startDate) : "No start date set"}
                             </Form.Text>
-                        </Form.Group>
-                        {/* Add Deadline with validation */}
+                        </Form.Group>                        {/* Add Deadline with validation */}
                         <Form.Group className="mb-3" controlId="formDeadline">
                             <Form.Label>Deadline</Form.Label>
                             <Form.Control
                                 type="date"
-                                value={newTask.deadline}
+                                value={formatDateForInput(newTask.deadline)}
                                 onChange={(e) => setNewTask({ ...newTask, deadline: e.target.value })}
                                 isInvalid={newTask.deadline && !isTaskDeadlineValid()}
+                                placeholder="MM/DD/YYYY"
                             />
                             {newTask.deadline && !isTaskDeadlineValid() && (
                                 <Form.Text className="text-danger">
                                     Deadline must be between task start date and project deadline
                                 </Form.Text>
-                            )}
-                            <Form.Text className="text-muted">
-                                Project {getProjectDateInfo().title} ends on: {getProjectDateInfo().deadline || "No deadline set"}
+                            )}                            <Form.Text className="text-muted">
+                                Project {getProjectDateInfo().title} ends on: {getProjectDateInfo().deadline ? formatDateForDisplay(getProjectDateInfo().deadline) : "No deadline set"}
                             </Form.Text>
                         </Form.Group>
                         <Form.Group className="mb-3" controlId="formEstimatedHours">
@@ -674,22 +695,6 @@ function Dashboard() {
                                 type="number"
                                 value={newTask.estimated_hours}
                                 onChange={(e) => setNewTask({ ...newTask, estimated_hours: e.target.value })}
-                            />
-                        </Form.Group>
-                        <Form.Group className="mb-3" controlId="formAllocatedBudget">
-                            <Form.Label>Allocated Budget</Form.Label>
-                            <Form.Control
-                                type="number"
-                                value={newTask.allocated_budget}
-                                onChange={(e) => setNewTask({ ...newTask, allocated_budget: e.target.value })}
-                            />
-                        </Form.Group>
-                        <Form.Group className="mb-3" controlId="formActualSpent">
-                            <Form.Label>Actual Spent</Form.Label>
-                            <Form.Control
-                                type="number"
-                                value={newTask.actual_spent}
-                                onChange={(e) => setNewTask({ ...newTask, actual_spent: e.target.value })}
                             />
                         </Form.Group>
                         <Button variant="primary" type="submit">
@@ -807,24 +812,6 @@ function Dashboard() {
                             onChange={(e) => setNewTask({ ...newTask, estimated_hours: e.target.value })}
                         />
                     </Form.Group>
-                    {/* Edit Allocated Budget */}
-                    <Form.Group className="mb-3" controlId="formAllocatedBudget">
-                        <Form.Label>Allocated Budget</Form.Label>
-                        <Form.Control
-                            type="number"
-                            value={newTask.allocated_budget}
-                            onChange={(e) => setNewTask({ ...newTask, allocated_budget: e.target.value })}
-                        />
-                    </Form.Group>
-                    {/* Edit Actual Spent */}
-                    <Form.Group className="mb-3" controlId="formActualSpent">
-                        <Form.Label>Actual Spent</Form.Label>
-                        <Form.Control
-                            type="number"
-                            value={newTask.actual_spent}
-                            onChange={(e) => setNewTask({ ...newTask, actual_spent: e.target.value })}
-                        />
-                    </Form.Group>
                     <Button variant="primary" type="submit">
                         Update Task
                     </Button>
@@ -832,31 +819,35 @@ function Dashboard() {
             </Modal.Body>
         </Modal>
 
-            {/* Projects List */}
-            <Projects
-                projects={projects}
-                onProjectClick={(project) => {
-                    setSelectedProjectId(project.id);
-                    handleProjectClick(project);
-                }}
-                onEditProject={handleEditProject}
-                onDeleteProject={handleDeleteProject}
-                selectedProjectId={selectedProjectId}
-                onViewExpenditures={handleViewExpenditures}
-            />
-
-            {/* Tasks List */}
-            {selectedProject && (
-                <div className="card mt-3 p-3 shadow-sm">
-                    <h4>Tasks for {projects?.find(p => p.id === selectedProject)?.title || "Unknown Project"}</h4>
-                    {console.log("Tasks:", tasks)} {/* Log tasks */}
-                    <Tasks
-                        tasks={tasks}
-                        onDeleteTask={handleDeleteTask}
-                        onEditTask={handleEditTask}
+            <div className="row">
+                <div className="col-md-12">
+                    {/* Projects List */}
+                    <Projects
+                        projects={projects}
+                        onProjectClick={(project) => {
+                            setSelectedProjectId(project.id);
+                            handleProjectClick(project);
+                        }}
+                        onEditProject={handleEditProject}
+                        onDeleteProject={handleDeleteProject}
+                        selectedProjectId={selectedProjectId}
+                        onViewExpenditures={handleViewExpenditures}
                     />
+
+                    {/* Tasks List */}
+                    {selectedProject && (
+                        <div className="card mt-3 p-3 shadow-sm">
+                            <h4>Tasks for {projects?.find(p => p.id === selectedProject)?.title || "Unknown Project"}</h4>
+                            <Tasks
+                                tasks={tasks}
+                                onDeleteTask={handleDeleteTask}
+                                onEditTask={handleEditTask}
+                                projectId={selectedProject}
+                            />
+                        </div>
+                    )}
                 </div>
-            )}
+            </div>
 
             {/* Expenditure Modal */}
             <Modal 

@@ -3,7 +3,8 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/klick logo.png";
 import { Modal, Button, Form } from 'react-bootstrap';
-
+import TaskComments from "./TaskComments";
+import Notifications from "./Notifications"; 
 
 function MemberDashboard() {
     const [message, setMessage] = useState("");
@@ -14,7 +15,18 @@ function MemberDashboard() {
     const [newStatus, setNewStatus] = useState("");
     const [newActualHours, setNewActualHours] = useState(0);
     const [currentProjectId, setCurrentProjectId] = useState(null);
+    const [expandedComments, setExpandedComments] = useState({});
     const navigate = useNavigate();
+
+    const formatDateForDisplay = (dateString) => {
+        if (!dateString) return "N/A";
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', {
+            month: '2-digit',
+            day: '2-digit',
+            year: 'numeric'
+        });
+    };
 
     const fetchDashboardData = useCallback(() => {
         const token = localStorage.getItem("token");
@@ -131,17 +143,33 @@ function MemberDashboard() {
         return (actualHours / estimatedHours) * 100; // Returns the progress in percentage
     };
 
+    const toggleComments = (taskId) => {
+        setExpandedComments(prev => ({
+            ...prev,
+            [taskId]: !prev[taskId]
+        }));
+    };
+
     return (
         <div className="container mt-5">
-            <img src={logo} alt="Logo" className="mb-3" style={{ width: "auto", height: "100px" }} />
-
+            <div className="d-flex justify-content-between align-items-center">
+                <img src={logo} alt="Logo" className="mb-3" style={{ width: "auto", height: "100px" }} />
+                <div className="d-flex align-items-center gap-3">
+                    <Notifications />
+                    <button className="btn btn-danger" onClick={handleLogout}>Logout</button>
+                </div>
+            </div>            
+            
             <h2 className="text-center">Member Dashboard</h2>
             <p className="text-muted text-center">{message}</p>
 
-            <div className="d-flex justify-content-end mb-4">
-                <button className="btn btn-danger" onClick={handleLogout}>
-                    Logout
-                </button>
+            <div className="d-flex justify-content-start mb-3">
+                <Button
+                    variant="info"
+                    onClick={() => navigate('/activities')}
+                >
+                    View Activity Feed
+                </Button>
             </div>
 
             <h4 className="mb-4">Projects and Tasks</h4>
@@ -182,56 +210,71 @@ function MemberDashboard() {
                                             </thead>
                                             <tbody>
                                                 {project.tasks.map((task, index) => (
-                                                    <tr key={index}>
-                                                        <td>{index + 1}</td>
-                                                        <td>{task.title}</td>
-                                                        <td>
-                                                            <span 
-                                                                className={`badge ${
-                                                                    task.status === 'completed' ? 'bg-success' : 
-                                                                    task.status === 'in progress' ? 'bg-warning' : 'bg-secondary'
-                                                                }`}
-                                                            >
-                                                                {task.status}
-                                                            </span>
-                                                        </td>
-                                                        <td>
-                                                            <span 
-                                                                className={`badge ${
-                                                                    task.priority === 'high' ? 'bg-danger' : 
-                                                                    task.priority === 'medium' ? 'bg-warning' : 'bg-info'
-                                                                }`}
-                                                            >
-                                                                {task.priority}
-                                                            </span>
-                                                        </td>
-                                                        <td>{task.start_date ? new Date(task.start_date).toLocaleDateString() : "N/A"}</td>
-                                                        <td>{task.deadline ? new Date(task.deadline).toLocaleDateString() : "N/A"}</td>
-                                                        <td>{task.estimated_hours != null ? task.estimated_hours : "N/A"}</td>
-                                                        <td>{task.actual_hours != null ? task.actual_hours : "N/A"}</td>
-                                                        <td>
-                                                            <div className="progress">
-                                                                <div 
-                                                                    className="progress-bar" 
-                                                                    role="progressbar" 
-                                                                    style={{ width: `${calculateProgress(task.actual_hours, task.estimated_hours)}%` }}
-                                                                    aria-valuenow={calculateProgress(task.actual_hours, task.estimated_hours)}
-                                                                    aria-valuemin="0" 
-                                                                    aria-valuemax="100"
+                                                    <React.Fragment key={index}>
+                                                        <tr>
+                                                            <td>{index + 1}</td>
+                                                            <td>{task.title}</td>
+                                                            <td>
+                                                                <span 
+                                                                    className={`badge ${
+                                                                        task.status === 'completed' ? 'bg-success' : 
+                                                                        task.status === 'in progress' ? 'bg-warning' : 'bg-secondary'
+                                                                    }`}
                                                                 >
-                                                                    {calculateProgress(task.actual_hours, task.estimated_hours).toFixed(2)}%
+                                                                    {task.status}
+                                                                </span>
+                                                            </td>
+                                                            <td>
+                                                                <span 
+                                                                    className={`badge ${
+                                                                        task.priority === 'high' ? 'bg-danger' : 
+                                                                        task.priority === 'medium' ? 'bg-warning' : 'bg-info'
+                                                                    }`}
+                                                                >
+                                                                    {task.priority}
+                                                                </span>
+                                                            </td>
+                                                            <td>{formatDateForDisplay(task.start_date)}</td>
+                                                            <td>{formatDateForDisplay(task.deadline)}</td>
+                                                            <td>{task.estimated_hours != null ? task.estimated_hours : "N/A"}</td>
+                                                            <td>{task.actual_hours != null ? task.actual_hours : "N/A"}</td>
+                                                            <td>
+                                                                <div className="progress">
+                                                                    <div 
+                                                                        className="progress-bar" 
+                                                                        role="progressbar" 
+                                                                        style={{ width: `${calculateProgress(task.actual_hours, task.estimated_hours)}%` }}
+                                                                        aria-valuenow={calculateProgress(task.actual_hours, task.estimated_hours)}
+                                                                        aria-valuemin="0" 
+                                                                        aria-valuemax="100"
+                                                                    >
+                                                                        {calculateProgress(task.actual_hours, task.estimated_hours).toFixed(2)}%
+                                                                    </div>
                                                                 </div>
-                                                            </div>
-                                                        </td>
-                                                        <td>
-                                                            <button
-                                                                className="btn btn-success btn-sm"
-                                                                onClick={() => openStatusModal(project.id, task)}
-                                                            >
-                                                                Update Status
-                                                            </button>
-                                                        </td>
-                                                    </tr>
+                                                            </td>
+                                                            <td>
+                                                                <button
+                                                                    className="btn btn-success btn-sm me-2"
+                                                                    onClick={() => openStatusModal(project.id, task)}
+                                                                >
+                                                                    Update Status
+                                                                </button>
+                                                                <button
+                                                                    className="btn btn-info btn-sm"
+                                                                    onClick={() => toggleComments(task.id)}
+                                                                >
+                                                                    💬 {expandedComments[task.id] ? 'Hide' : 'Comments'}
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                        {expandedComments[task.id] && (
+                                                            <tr>
+                                                                <td colSpan="10">
+                                                                    <TaskComments taskId={task.id} projectId={project.id} />
+                                                                </td>
+                                                            </tr>
+                                                        )}
+                                                    </React.Fragment>
                                                 ))}
                                             </tbody>
                                         </table>

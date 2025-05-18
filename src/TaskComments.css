@@ -1,0 +1,112 @@
+.task-comments {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    margin: 1rem 0;
+}
+
+.comments-list {
+    max-height: 300px;
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+.comment-item {
+    background-color: white;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.comment-item:hover {
+    transform: translateX(2px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.comment-form .input-group {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* Scrollbar styling */
+.comments-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.comments-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.comments-list::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+}
+
+.comments-list::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Edit functionality styles */
+.comment-item .btn-link {
+    text-decoration: none;
+    font-size: 0.875rem;
+    padding: 0;
+    margin-right: 0.5rem;
+    color: #0d6efd;
+}
+
+.comment-item .btn-link:hover {
+    color: #0a58ca;
+    text-decoration: underline;
+}
+
+.comment-item .btn-link.text-danger {
+    color: #dc3545 !important;
+}
+
+.comment-item .btn-link.text-danger:hover {
+    color: #bb2d3b !important;
+    text-decoration: underline;
+}
+
+.comment-item .d-flex.gap-3 {
+    display: flex;
+    gap: 1rem !important;
+}
+
+.comment-item .input-group {
+    margin-top: 0.5rem;
+}
+
+.comment-item .input-group .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    margin-left: 0.25rem;
+}
+
+.comment-item .input-group input.form-control {
+    height: calc(1.5em + 0.5rem + 2px);
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    border-radius: 0.2rem;
+}
+
+.comment-item .input-group .btn-success {
+    background-color: #198754;
+    border-color: #198754;
+}
+
+.comment-item .input-group .btn-success:hover {
+    background-color: #157347;
+    border-color: #146c43;
+}
+
+.comment-item .input-group .btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+.comment-item .input-group .btn-secondary:hover {
+    background-color: #5c636a;
+    border-color: #565e64;
+}

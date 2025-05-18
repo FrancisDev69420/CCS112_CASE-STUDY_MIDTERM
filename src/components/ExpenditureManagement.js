@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Modal, Button, Form, Table } from 'react-bootstrap';
 import axios from 'axios';
 
@@ -20,11 +20,17 @@ function ExpenditureManagement({ project, onUpdate }) {
         'Other'
     ]);
 
-    useEffect(() => {
-        fetchExpenditures();
-    }, [project.id]);
+    const formatDateForDisplay = (dateString) => {
+        if (!dateString) return "N/A";
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', {
+            month: '2-digit',
+            day: '2-digit',
+            year: 'numeric'
+        });
+    };
 
-    const fetchExpenditures = async () => {
+    const fetchExpenditures = useCallback(async () => {
         try {
             const response = await axios.get(`http://127.0.0.1:8000/api/projects/${project.id}/expenditures`, {
                 headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
@@ -33,7 +39,11 @@ function ExpenditureManagement({ project, onUpdate }) {
         } catch (error) {
             console.error('Error fetching expenditures:', error);
         }
-    };
+    }, [project.id]);
+
+    useEffect(() => {
+        fetchExpenditures();
+    }, [fetchExpenditures]);
 
     const handleAddExpenditure = async (e) => {
         e.preventDefault();
@@ -120,7 +130,7 @@ function ExpenditureManagement({ project, onUpdate }) {
                     <tbody>
                         {expenditures.map((expenditure, index) => (
                             <tr key={index}>
-                                <td>{new Date(expenditure.date).toLocaleDateString()}</td>
+                                <td>{formatDateForDisplay(expenditure.date)}</td>
                                 <td>{expenditure.description}</td>
                                 <td>{expenditure.category}</td>
                                 <td>₱{parseFloat(expenditure.amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
@@ -190,4 +200,4 @@ function ExpenditureManagement({ project, onUpdate }) {
     );
 }
 
-export default ExpenditureManagement; 
+export default ExpenditureManagement;

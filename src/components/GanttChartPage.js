@@ -4,7 +4,6 @@ import { Gantt, ViewMode } from "gantt-task-react";
 import "gantt-task-react/dist/index.css";
 import logo from "../assets/klick logo.png";
 
-
 function GanttChartPage() {
     const { id } = useParams();
     const navigate = useNavigate(); 
@@ -67,6 +66,15 @@ function GanttChartPage() {
             }
         });
     }
+
+    // Custom date formatter
+    const customDateFormatter = date => {
+        return new Date(date).toLocaleDateString('en-US', {
+            month: 'numeric',
+            day: 'numeric',
+            year: 'numeric'
+        });
+    };
     
     return (
         <div className="container mt-4">
@@ -93,7 +101,50 @@ function GanttChartPage() {
                                 viewMode={ViewMode.Day}
                                 locale="en-US"
                                 listCellWidth=""
-                                columnWidth={60}
+                                columnWidth={60}                                TooltipContent={({ task }) => (
+                                    <div style={{ 
+                                        padding: '12px',
+                                        background: 'white',
+                                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                                        borderRadius: '4px',
+                                        border: '1px solid #e0e0e0'
+                                    }}>
+                                        <div style={{ 
+                                            fontSize: '16px', 
+                                            fontWeight: 'bold',
+                                            marginBottom: '8px',
+                                            color: '#333',
+                                            borderBottom: '1px solid #eee',
+                                            paddingBottom: '4px'
+                                        }}>
+                                            {task.name}
+                                        </div>
+                                        <div style={{
+                                            backgroundColor: '#f8f9fa',
+                                            padding: '8px',
+                                            borderRadius: '4px',
+                                            marginBottom: '4px'
+                                        }}>
+                                            <div style={{ marginBottom: '4px' }}>
+                                                <span style={{ color: '#666' }}>Start:</span>{' '}
+                                                <span style={{ color: '#007bff' }}>{customDateFormatter(task.start)}</span>
+                                            </div>
+                                            <div style={{ marginBottom: '4px' }}>
+                                                <span style={{ color: '#666' }}>End:</span>{' '}
+                                                <span style={{ color: '#007bff' }}>{customDateFormatter(task.end)}</span>
+                                            </div>
+                                            <div>
+                                                <span style={{ color: '#666' }}>Progress:</span>{' '}
+                                                <span style={{ 
+                                                    color: task.progress === 100 ? '#28a745' : 
+                                                           task.progress === 50 ? '#ffc107' : '#dc3545'
+                                                }}>
+                                                    {task.progress}%
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
                             />
                         ) : (
                             <div className="alert alert-info">

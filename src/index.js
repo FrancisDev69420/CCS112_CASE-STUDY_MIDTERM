@@ -9,6 +9,7 @@ import Register from "./components/Register";
 import Dashboard from "./components/Dashboard";
 import MemberDashboard from "./components/Member-Dashboard";
 import GanttChartPage from "./components/GanttChartPage";
+import ActivityFeedPage from "./components/ActivityFeedPage";
 
 function App() {
     return (
@@ -20,6 +21,7 @@ function App() {
                     <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/Member-Dashboard" element={<MemberDashboard />} />
                     <Route path="/project/:id/gantt" element={<GanttChartPage />} />
+                    <Route path="/activities" element={<ActivityFeedPage />} />
                 </Routes>
             </Suspense>
         </Router>
