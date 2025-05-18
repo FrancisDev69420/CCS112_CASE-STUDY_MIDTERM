@@ -6,9 +6,19 @@ use Illuminate\Http\Request;
 use App\Models\Task;
 use App\Models\Project;
 use App\Models\User;
+use App\Http\Controllers\NotificationController;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\ActivityLogController;
 
 class TaskController extends Controller
 {
+    protected $activityLogController;
+
+    public function __construct(ActivityLogController $activityLogController)
+    {
+        $this->activityLogController = $activityLogController;
+    }
+
     // Fetch all tasks for a specific project with user details
     public function index($projectId)
     {
@@ -45,6 +55,21 @@ class TaskController extends Controller
         $task = new Task($request->all());
         $task->project_id = $projectId;
         $task->save();
+
+        // Log activity
+        $this->activityLogController->store([
+            'project_id' => $projectId,
+            'task_id' => $task->id,
+            'activity_type' => 'task_created',
+            'description' => "Created new task: {$task->title}",
+            'new_values' => $task->toArray()
+        ]);
+
+        // Create notification if a team member is assigned
+        if ($task->user_id) {
+            $notificationController = new NotificationController();
+            $notificationController->createTaskAssignmentNotification($task, Auth::user());
+        }
 
         return response()->json($task->load('user'), 201);
     }
@@ -86,7 +111,32 @@ class TaskController extends Controller
         ]);
 
         $task = Task::where('project_id', $projectId)->findOrFail($taskId);
-        $task->update($request->all());
+        $oldUserId = $task->user_id;
+        
+        $oldValues = $task->toArray();
+        
+        $task->fill($request->all());
+        $task->save();
+
+        // Log activity
+        $this->activityLogController->store([
+            'project_id' => $projectId,
+            'task_id' => $taskId,
+            'activity_type' => 'task_updated',
+            'description' => "Updated task: {$task->title}",
+            'old_values' => $oldValues,
+            'new_values' => $task->toArray()
+        ]);
+
+        // Create notification for task update
+        $notificationController = new NotificationController();
+        $notificationController->createTaskUpdateNotification($task, Auth::user());
+
+        // Create notification if a team member is assigned or changed
+        if ($task->user_id && $task->user_id !== $oldUserId) {
+            $notificationController = new NotificationController();
+            $notificationController->createTaskAssignmentNotification($task, Auth::user());
+        }
 
         return response()->json($task->load('user'));
     }
@@ -96,7 +146,17 @@ class TaskController extends Controller
     public function destroy($projectId, $taskId)
     {
         $task = Task::where('project_id', $projectId)->findOrFail($taskId);
+        
+        $taskDetails = $task->toArray();
         $task->delete();
+
+        // Log activity
+        $this->activityLogController->store([
+            'project_id' => $projectId,
+            'activity_type' => 'task_deleted',
+            'description' => "Deleted task: {$task->title}",
+            'old_values' => $taskDetails
+        ]);
 
         return response()->json(['message' => 'Task deleted successfully']);
     }

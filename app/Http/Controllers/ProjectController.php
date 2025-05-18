@@ -10,9 +10,6 @@ class ProjectController extends Controller
     public function index()
     {
         return response()->json(Project::all());
-
-        // Include remaining_budget in the response
-        return response()->json($projects);
     }
 
     public function store(Request $request)
@@ -22,25 +19,14 @@ class ProjectController extends Controller
             $request->validate([
                 'title' => 'required|string|max:255',
                 'description' => 'nullable|string',
-                'user_id' => 'required|exists:users,id', // Ensure the user exists
+                'user_id' => 'required|exists:users,id',
                 'budget' => 'required|numeric|min:0',
-                'start_date' => 'nullable|date', // Validating start_date as a date
-                'deadline' => 'nullable|date',   // Validating deadline as a date
+                'start_date' => 'nullable|date',
+                'deadline' => 'nullable|date',
             ]);
 
             // Create the project with all the validated data
             $project = Project::create($request->all());
-
-            // Calculate the total allocated budget from tasks
-            $totalAllocated = $project->tasks->sum('allocated_budget');
-
-            // Calculate the remaining budget
-            $remainingBudget = $project->budget - $totalAllocated;
-
-            // Update the remaining_budget field
-            $project->remaining_budget = $remainingBudget;
-            $project->save();
-
             return response()->json($project, 201);
 
         } catch (\Exception $e) {
@@ -50,17 +36,11 @@ class ProjectController extends Controller
 
     public function show($id)
     {
-        $project = Project::find($id);
         $project = Project::with('tasks')->findOrFail($id);
-
-        if (!$project) {
-            return response()->json(['error' => 'Project not found'], 404);
-        }
-
         return response()->json($project);
     }
 
-   public function update(Request $request, $id)
+    public function update(Request $request, $id)
     {
         try {
             $project = Project::findOrFail($id);
@@ -69,25 +49,14 @@ class ProjectController extends Controller
             $request->validate([
                 'title' => 'required|string|max:255',
                 'description' => 'nullable|string',
-                'user_id' => 'required|exists:users,id', // Ensure the user exists
+                'user_id' => 'required|exists:users,id',
                 'budget' => 'nullable|numeric|min:0',
-                'start_date' => 'nullable|date', // Validating start_date as a date
-                'deadline' => 'nullable|date',   // Validating deadline as a date
+                'start_date' => 'nullable|date',
+                'deadline' => 'nullable|date',
             ]);
 
             // Update the project with the new data
             $project->update($request->all());
-
-            // Recalculate the total allocated budget
-            $totalAllocated = $project->tasks->sum('allocated_budget');
-
-            // Calculate the remaining budget
-            $remainingBudget = $project->budget - $totalAllocated;
-
-            // Update the remaining_budget field
-            $project->remaining_budget = $remainingBudget;
-            $project->save();
-
             return response()->json($project);
 
         } catch (\Exception $e) {
@@ -104,5 +73,4 @@ class ProjectController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
-
 }

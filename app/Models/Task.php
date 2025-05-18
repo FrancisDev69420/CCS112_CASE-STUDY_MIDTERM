@@ -9,18 +9,31 @@ class Task extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['title', 'description', 'status', 'priority', 'project_id', 'user_id', 'start_date', 'deadline', 'estimated_hours',
-    'actual_hours',];
+    protected $fillable = [
+        'title',
+        'description',
+        'status',
+        'priority',
+        'project_id',
+        'user_id',
+        'start_date',
+        'deadline',
+        'estimated_hours',
+        'actual_hours'
+    ];
 
     public function project()
     {
         return $this->belongsTo(Project::class);
     }
 
-    // app/Models/Task.php
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
+    }
 }
