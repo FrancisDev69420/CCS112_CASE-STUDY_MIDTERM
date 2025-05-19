@@ -847,12 +847,22 @@ function Dashboard() {
                     {/* Tasks List */}
                     {selectedProject && (
                         <div className="card mt-3 p-3 shadow-sm">
-                            <h4>Tasks for {projects?.find(p => p.id === selectedProject)?.title || "Unknown Project"}</h4>
+                            <div className="d-flex justify-content-between align-items-center mb-2">
+                                <h2>Tasks</h2>
+                                {selectedProjectId && (
+                                    <button
+                                        className="btn btn-warning"
+                                        onClick={() => navigate(`/projects/${selectedProjectId}/risks-issues`)}
+                                    >
+                                        Manage Risks & Issues
+                                    </button>
+                                )}
+                            </div>
                             <Tasks
                                 tasks={tasks}
-                                onDeleteTask={handleDeleteTask}
                                 onEditTask={handleEditTask}
-                                projectId={selectedProject}
+                                onDeleteTask={handleDeleteTask}
+                                projectId={selectedProjectId}
                             />
                         </div>
                     )}
