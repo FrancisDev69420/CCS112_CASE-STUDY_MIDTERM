@@ -13,5 +13,12 @@ class UserController extends Controller
         $users = User::all(); // Retrieve all users
         return response()->json($users);
     }
+
+    // Fetch team members by project
+    public function getTeamMembers($projectId)
+    {
+        $teamMembers = User::where('role', 'Team Member')->get(); // Filter users by role
+        return response()->json($teamMembers);
+    }
 }
 

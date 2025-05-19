@@ -13,6 +13,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\RiskController;
 use App\Http\Controllers\IssueController;
+use App\Http\Controllers\FileController;
 
 Route::middleware('auth:sanctum')->get('/users', [UserController::class, 'index']); // Fetch all users
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
@@ -103,6 +104,22 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('issues/{issue}', [IssueController::class, 'update']);
         Route::delete('issues/{issue}', [IssueController::class, 'destroy']);
     });
+
+    // File Routes
+    Route::prefix('projects/{projectId}')->group(function () {
+        Route::get('files', [FileController::class, 'index']);
+        Route::post('files', [FileController::class, 'store']);
+        Route::put('files/{file}', [FileController::class, 'update']);
+        Route::delete('files/{file}', [FileController::class, 'destroy']);
+        Route::get('files/{file}/download', [FileController::class, 'download']);
+    });
+
+    // Team Members Route
+    Route::get('/projects/{projectId}/members', [UserController::class, 'getTeamMembers']); // Fetch team members for a project
+
+    Route::post('/projects/{projectId}/files/{file}/members', [FileController::class, 'addMembers']); // Add members to a file
+    Route::get('/projects/{projectId}/files/{file}/members', [FileController::class, 'getMembers']); // Get members of a file
+    Route::delete('/projects/{projectId}/files/{file}/members', [FileController::class, 'removeMembers']); // Remove members from a file
 });
 
 // Public download route for comment attachments (must be outside auth:sanctum)
