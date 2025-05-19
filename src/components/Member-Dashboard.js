@@ -5,6 +5,7 @@ import logo from "../assets/klick logo.png";
 import { Modal, Button, Form } from 'react-bootstrap';
 import TaskComments from "./TaskComments";
 import Notifications from "./Notifications"; 
+import "../MemberDashboard.css";
 
 function MemberDashboard() {
     const [message, setMessage] = useState("");

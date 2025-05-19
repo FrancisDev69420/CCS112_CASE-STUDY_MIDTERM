@@ -7,6 +7,7 @@ import ExpenditureManagement from "./ExpenditureManagement";
 import logo from "../assets/klick logo.png";
 import { Modal, Button, Form } from 'react-bootstrap';
 import Notifications from "./Notifications"; 
+import '../Dashboard.css'; 
 
 function Dashboard() {
     // Date formatting utilities
@@ -470,13 +471,13 @@ function Dashboard() {
     const handleViewExpenditures = (project) => {
         setSelectedProjectForExpenditure(project);
         setShowExpenditureModal(true);
-    };
-
-    return (
+    };    return (
         <div className="container mt-5">
-            <div className="d-flex justify-content-between align-items-center">
-                <img src={logo} alt="Logo" className="mb-3" style={{ width: "auto", height: "100px" }} />
-                <div className="d-flex align-items-center gap-3">
+            <div className="dashboard-header">
+                <div className="logo-container">
+                    <img src={logo} alt="Logo" className="mb-3" />
+                </div>
+                <div className="header-actions">
                     <Notifications />
                     <button className="btn btn-danger" onClick={handleLogout}>Logout</button>
                 </div>
@@ -486,12 +487,12 @@ function Dashboard() {
             <p className="text-muted text-center">{message}</p>            
             
             {/* Project Buttons */}
-            <div className="d-flex justify-content-between mb-3">
+            <div className="action-buttons">
                 <Button 
                     variant="success" 
                     onClick={() => {
-                        setEditingProject(null);  // Reset editing state
-                        setNewProject({ title: "", description: "", budget: "", start_date: "", deadline: "" });  // Reset form fields
+                        setEditingProject(null);
+                        setNewProject({ title: "", description: "", budget: "", start_date: "", deadline: "" });
                         setShowModal(true);
                     }}
                 >
@@ -504,15 +505,13 @@ function Dashboard() {
                 >
                     View Activity Feed
                 </Button>
-            </div>
-
-            {/* Conditionally render Add Task button if a project is selected */}
+            </div>            {/* Conditionally render Add Task button if a project is selected */}
             {selectedProject && (
-            <div className="d-flex justify-content-start mb-3">
+            <div className="action-buttons justify-content-start">
                 <Button 
                     variant="primary" 
                     onClick={() => {
-                        setEditingTask(null);  // Reset editing task state
+                        setEditingTask(null);
                         setNewTask({
                             title: "",
                             description: "",
@@ -524,7 +523,7 @@ function Dashboard() {
                             estimated_hours: "",
                             allocated_budget: "",
                             actual_spent: ""
-                        });  // Reset task form fields
+                        });
                         setTaskModalShow(true);
                     }}
                 >

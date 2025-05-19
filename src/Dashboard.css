@@ -1,0 +1,231 @@
+/* Dashboard Layout */
+.container {
+    padding: 20px;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    box-sizing: border-box;
+    overflow-x: hidden;
+}
+
+/* Header Styles */
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+    width: 100%;
+    padding: 0.5rem;
+    background-color: #fff;
+
+}
+
+.logo-container img {
+    height: 100px;
+    width: auto;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* Button Groups */
+.action-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.action-buttons button {
+    min-width: 120px;
+}
+
+/* Cards and Content */
+.card {
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1rem;
+    background: #fff;
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Form Controls */
+.form-control {
+    max-width: 100%;
+    border-radius: 6px;
+    border: 1px solid #ced4da;
+    padding: 0.5rem 0.75rem;
+    transition: border-color 0.15s ease-in-out;
+}
+
+.form-control:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Button Styles */
+.btn {
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.btn:active {
+    transform: translateY(1px);
+}
+
+/* Modal Styles */
+.modal-dialog {
+    margin: 1rem;
+    max-width: 500px;
+}
+
+/* Mobile Styles */
+@media screen and (max-width: 576px) {
+    .container {
+        padding: 8px;
+    }
+
+    .dashboard-header {
+        flex-direction: column;
+        text-align: center;
+        padding: 1rem 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .logo-container {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        margin-bottom: 1rem;
+    }
+
+    .logo-container img {
+        height: 60px;
+        width: auto;
+        max-width: 80%;
+    }
+
+    .header-actions {
+        width: 100%;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .header-actions button {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+        width: 100%;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .action-buttons button {
+        width: 100%;
+        padding: 0.75rem;
+        margin: 0;
+        font-size: 0.9rem;
+    }
+
+    h2.text-center {
+        font-size: 1.25rem;
+        margin: 0.5rem 0;
+    }
+
+    .modal-dialog {
+        margin: 0.5rem;
+        max-width: 100%;
+    }
+
+    .modal-body {
+        padding: 1rem;
+    }
+
+    .form-group {
+        margin-bottom: 0.75rem;
+    }
+
+    .card {
+        margin-bottom: 0.5rem;
+        padding: 0.75rem;
+    }
+
+    .row {
+        margin: 0;
+    }
+
+    .col-md-12 {
+        padding: 0;
+    }
+
+    
+    table {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+  
+    .form-control {
+        height: 38px;
+        font-size: 16px; 
+    }
+
+    
+    .btn {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+/* Tablet Styles */
+@media screen and (min-width: 577px) and (max-width: 768px) {
+    .container {
+        padding: 15px;
+    }
+
+    .logo-container img {
+        height: 90px;
+    }
+
+    .action-buttons {
+        gap: 0.75rem;
+    }
+
+    .modal-dialog {
+        margin: 1rem auto;
+    }
+}
+
+/* Large Tablet/Small Desktop */
+@media screen and (min-width: 769px) and (max-width: 992px) {
+    .container {
+        padding: 20px;
+    }
+
+    .action-buttons {
+        gap: 1rem;
+    }
+}

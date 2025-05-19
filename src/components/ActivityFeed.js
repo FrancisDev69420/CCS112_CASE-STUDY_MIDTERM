@@ -55,7 +55,6 @@ function ActivityFeed({ projectId, taskId }) {
 
     return (
         <div className="activity-feed">
-            <h3>Activity Feed</h3>
             {activities.length === 0 ? (
                 <p className="no-activities">No activities to display</p>
             ) : 
