@@ -140,7 +140,10 @@ function ExpenditureManagement({ project, onUpdate }) {
                 </Table>
             </div>
 
-            <Modal show={showModal} onHide={() => setShowModal(false)}>
+            <Modal show={showModal} onHide={() => setShowModal(false)}
+                dialogClassName="modal-lg custom-expense-modal"
+                centered
+            >
                 <Modal.Header closeButton>
                     <Modal.Title>Add New Expenditure</Modal.Title>
                 </Modal.Header>

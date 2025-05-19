@@ -385,7 +385,8 @@ function Dashboard() {
             priority: task.priority,
             user_id: task.user_id,
             start_date: task.start_date,
-            deadline: task.deadline,            estimated_hours: task.estimated_hours ?? "" // Populate estimated_hours
+            deadline: task.deadline,            
+            estimated_hours: task.estimated_hours ?? ""// Populate estimated_hours
         });
         setEditTaskModalShow(true);
     };
@@ -853,13 +854,14 @@ function Dashboard() {
                 show={showExpenditureModal} 
                 onHide={() => setShowExpenditureModal(false)}
                 size="lg"
+                centered
             >
                 <Modal.Header closeButton>
                     <Modal.Title>
                         Expenditures - {selectedProjectForExpenditure?.title}
                     </Modal.Title>
                 </Modal.Header>
-                <Modal.Body>
+                <Modal.Body className="expenditure-modal-body">
                     {selectedProjectForExpenditure && (
                         <ExpenditureManagement
                             project={selectedProjectForExpenditure}

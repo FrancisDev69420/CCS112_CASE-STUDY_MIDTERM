@@ -273,3 +273,30 @@
         gap: 1rem;
     }
 }
+
+/* Custom Expenditure Modal Styles */
+@media (min-width: 1000px) {
+  .modal-dialog.modal-lg.custom-expense-modal {
+    max-width: 1000px !important;
+    width: 95vw !important;
+    min-width: 800px;
+  }
+  .expenditure-modal-content {
+    padding: 2rem 2rem 1.5rem 2rem !important;
+    max-height: calc(100vh - 160px) !important;
+  }
+  .modal-lg .modal-header,
+  .modal-lg .modal-footer {
+    padding: 1.5rem 2rem !important;
+  }
+}
+
+@media (max-width: 999px) {
+  .modal-dialog.modal-lg.custom-expense-modal {
+    max-width: 98vw !important;
+    min-width: unset;
+  }
+  .expenditure-modal-content {
+    padding: 1rem !important;
+  }
+}

@@ -30,7 +30,7 @@ function Tasks({ tasks = [], onEditTask, onDeleteTask, projectId }) {
                         <th>Assigned to</th>
                         <th>Start Date</th>
                         <th>Deadline</th>
-                        <th style={{ width: '80px' }}>Estimated Hours</th>
+                        <th>Estimated Hours</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -46,7 +46,7 @@ function Tasks({ tasks = [], onEditTask, onDeleteTask, projectId }) {
                                     <td>{task.user ? task.user.name : 'Not assigned'}</td>
                                     <td>{formatDateForDisplay(task.start_date)}</td>
                                     <td>{formatDateForDisplay(task.deadline)}</td>
-                                    <td style={{ width: '80px' }}>
+                                    <td >
                                         {task.estimated_hours != null ? task.estimated_hours : 'N/A'}
                                     </td>
                                     <td>
