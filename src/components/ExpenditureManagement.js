@@ -83,66 +83,59 @@ function ExpenditureManagement({ project, onUpdate }) {
                 <Button variant="primary" onClick={() => setShowModal(true)}>
                     Add Expenditure
                 </Button>
-            </div>
-            <div className="card-body">
-                <div className="row mb-4">
-                    <div className="col-md-4">
-                        <div className="card bg-light">
-                            <div className="card-body">
-                                <h6 className="card-title">Total Budget</h6>
-                                <p className="card-text h4">
-                                    ₱{project.budget.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                                </p>
+            </div>              <div className="card-body">                
+                <div className="row g-3 mb-4">
+                    <div className="col-md-6">
+                        <div className="d-flex flex-column bg-light rounded px-4 py-3 h-100">
+                            <div className="text-muted small">Total Budget</div>
+                            <div className="h6 mb-2 mt-1">
+                                ₱{project.budget.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                            </div>
+                            <div className="text-muted small mt-2">Remaining Budget</div>
+                            <div className="h6 mb-0 mt-1">
+                                ₱{calculateRemainingBudget().toLocaleString('en-US', { minimumFractionDigits: 2 })}
                             </div>
                         </div>
                     </div>
-                    <div className="col-md-4">
-                        <div className="card bg-light">
-                            <div className="card-body">
-                                <h6 className="card-title">Total Spent</h6>
-                                <p className="card-text h4">
-                                    ₱{calculateTotalSpent().toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                                </p>
+                    <div className="col-md-6">
+                        <div className="d-flex flex-column bg-light rounded px-4 py-3 h-100">
+                            <div className="text-muted small">Total Spent</div>
+                            <div className="h6 mb-0 mt-1">
+                                ₱{calculateTotalSpent().toLocaleString('en-US', { minimumFractionDigits: 2 })}
                             </div>
                         </div>
                     </div>
-                    <div className="col-md-4">
-                        <div className="card bg-light">
-                            <div className="card-body">
-                                <h6 className="card-title">Remaining Budget</h6>
-                                <p className="card-text h4">
-                                    ₱{calculateRemainingBudget().toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>                <Table striped hover responsive className="expenditure-table">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Description</th>
-                            <th>Category</th>
-                            <th>Amount</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {expenditures.length > 0 ? (
-                            expenditures.map((expenditure, index) => (
-                                <tr key={index}>
-                                    <td>{formatDateForDisplay(expenditure.date)}</td>
-                                    <td>{expenditure.description}</td>
-                                    <td>{expenditure.category}</td>
-                                    <td>₱{parseFloat(expenditure.amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
-                                </tr>
-                            ))
-                        ) : (
+                </div>
+                <div className="table-responsive" style={{ overflowX: 'hidden' }}>
+                    <Table striped hover className="expenditure-table w-100">
+                        <thead>
                             <tr>
-                                <td colSpan="4" className="text-center py-3">No expenditures recorded yet</td>
+                                <th>Date</th>
+                                <th>Description</th>
+                                <th>Category</th>
+                                <th>Amount</th>
                             </tr>
-                        )}
-                    </tbody>
-                </Table>
-            </div>            <Modal show={showModal} onHide={() => setShowModal(false)}
+                        </thead>
+                        <tbody>
+                            {expenditures.length > 0 ? (
+                                expenditures.map((expenditure, index) => (
+                                    <tr key={index}>
+                                        <td>{formatDateForDisplay(expenditure.date)}</td>
+                                        <td>{expenditure.description}</td>
+                                        <td>{expenditure.category}</td>
+                                        <td>₱{parseFloat(expenditure.amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan="4" className="text-center py-3">No expenditures recorded yet</td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </Table>
+                </div>
+            </div>
+            <Modal show={showModal} onHide={() => setShowModal(false)}
                 dialogClassName="modal-lg custom-expense-modal"
                 centered
             >
