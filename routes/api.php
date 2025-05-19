@@ -11,6 +11,8 @@ use App\Models\Project;
 use App\Http\Controllers\ExpenditureController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ActivityLogController;
+use App\Http\Controllers\RiskController;
+use App\Http\Controllers\IssueController;
 
 Route::middleware('auth:sanctum')->get('/users', [UserController::class, 'index']); // Fetch all users
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
@@ -86,6 +88,21 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/activities', [ActivityLogController::class, 'index']);
     Route::get('/projects/{project}/activities', [ActivityLogController::class, 'index']);
     Route::get('/tasks/{task}/activities', [ActivityLogController::class, 'index']);
+
+    // Risk and Issue Routes
+    Route::prefix('projects/{projectId}')->group(function () {
+        // Risk Routes
+        Route::get('risks', [RiskController::class, 'index']);
+        Route::post('risks', [RiskController::class, 'store']);
+        Route::put('risks/{risk}', [RiskController::class, 'update']);
+        Route::delete('risks/{risk}', [RiskController::class, 'destroy']);
+
+        // Issue Routes
+        Route::get('issues', [IssueController::class, 'index']);
+        Route::post('issues', [IssueController::class, 'store']);
+        Route::put('issues/{issue}', [IssueController::class, 'update']);
+        Route::delete('issues/{issue}', [IssueController::class, 'destroy']);
+    });
 });
 
 // Public download route for comment attachments (must be outside auth:sanctum)
