@@ -90,9 +90,48 @@
 }
 
 /* Modal Styles */
+.modal {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+}
+
 .modal-dialog {
-    margin: 1rem;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    margin: 1.75rem auto;
     max-width: 500px;
+    width: calc(100% - 2rem);
+}
+
+.modal-content {
+    width: 100%;
+    border-radius: 8px;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.modal-header {
+    padding: 1rem;
+    border-bottom: 1px solid #dee2e6;
+    background-color: #f8f9fa;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+.modal-body {
+    padding: 1.5rem;
+    max-height: calc(100vh - 210px);
+    overflow-y: auto;
+}
+
+.modal-footer {
+    padding: 1rem;
+    border-top: 1px solid #dee2e6;
+    background-color: #f8f9fa;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
 }
 
 /* Mobile Styles */
@@ -153,11 +192,16 @@
 
     .modal-dialog {
         margin: 0.5rem;
-        max-width: 100%;
+        width: calc(100% - 1rem);
+    }
+
+    .modal-content {
+        max-height: calc(100vh - 1rem);
     }
 
     .modal-body {
         padding: 1rem;
+        max-height: calc(100vh - 180px);
     }
 
     .form-group {

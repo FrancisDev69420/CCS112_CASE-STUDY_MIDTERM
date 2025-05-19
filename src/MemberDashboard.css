@@ -108,6 +108,43 @@
 .bg-danger { background-color: #dc3545 !important; }
 .bg-info { background-color: #17a2b8 !important; }
 
+/* Modal Styles */
+.modal-dialog {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 60px);
+    margin: 30px auto;
+}
+
+.modal-content {
+    width: 100%;
+    max-width: 500px;
+    margin: auto;
+    border-radius: 8px;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header {
+    padding: 1rem;
+    border-bottom: 1px solid #dee2e6;
+    background-color: #f8f9fa;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.modal-footer {
+    padding: 1rem;
+    border-top: 1px solid #dee2e6;
+    background-color: #f8f9fa;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
 /* Mobile Styles */
 @media screen and (max-width: 768px) {
     .container.mt-5 {
@@ -188,6 +225,19 @@
     .table td:last-child .btn-sm {
         padding: 0.25rem 0.5rem;
         font-size: 0.75rem;
+    }
+
+    .modal-dialog {
+        margin: 0.5rem;
+        min-height: calc(100vh - 1rem);
+    }
+
+    .modal-content {
+        max-width: 100%;
+    }
+
+    .modal-body {
+        padding: 1rem;
     }
 }
 

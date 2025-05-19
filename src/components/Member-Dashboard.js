@@ -288,10 +288,15 @@ function MemberDashboard() {
                 ))
             )}
 
-            {/* Modal for updating task status */}
-            <Modal show={showStatusModal} onHide={() => setShowStatusModal(false)} centered>
+            {/* Modal for updating task status */}            <Modal 
+                show={showStatusModal} 
+                onHide={() => setShowStatusModal(false)} 
+                centered
+                aria-labelledby="status-modal"
+                className="custom-modal"
+            >
                 <Modal.Header closeButton>
-                    <Modal.Title>Update Task Status</Modal.Title>
+                    <Modal.Title id="status-modal">Update Task Status</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     {currentTask && (
