@@ -116,9 +116,7 @@ function ExpenditureManagement({ project, onUpdate }) {
                             </div>
                         </div>
                     </div>
-                </div>
-
-                <Table striped bordered hover>
+                </div>                <Table striped hover responsive className="expenditure-table">
                     <thead>
                         <tr>
                             <th>Date</th>
@@ -128,74 +126,114 @@ function ExpenditureManagement({ project, onUpdate }) {
                         </tr>
                     </thead>
                     <tbody>
-                        {expenditures.map((expenditure, index) => (
-                            <tr key={index}>
-                                <td>{formatDateForDisplay(expenditure.date)}</td>
-                                <td>{expenditure.description}</td>
-                                <td>{expenditure.category}</td>
-                                <td>₱{parseFloat(expenditure.amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+                        {expenditures.length > 0 ? (
+                            expenditures.map((expenditure, index) => (
+                                <tr key={index}>
+                                    <td>{formatDateForDisplay(expenditure.date)}</td>
+                                    <td>{expenditure.description}</td>
+                                    <td>{expenditure.category}</td>
+                                    <td>₱{parseFloat(expenditure.amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td colSpan="4" className="text-center py-3">No expenditures recorded yet</td>
                             </tr>
-                        ))}
+                        )}
                     </tbody>
                 </Table>
-            </div>
-
-            <Modal show={showModal} onHide={() => setShowModal(false)}
+            </div>            <Modal show={showModal} onHide={() => setShowModal(false)}
                 dialogClassName="modal-lg custom-expense-modal"
                 centered
             >
                 <Modal.Header closeButton>
                     <Modal.Title>Add New Expenditure</Modal.Title>
                 </Modal.Header>
-                <Modal.Body>
+                <Modal.Body className="expenditure-modal-content">
+                    <div className="expenditure-stats-container">
+                        <div className="expenditure-stat-card">
+                            <div className="expenditure-stat-title">Total Budget</div>
+                            <div className="expenditure-stat-value">₱{project.budget.toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
+                        </div>
+                        <div className="expenditure-stat-card">
+                            <div className="expenditure-stat-title">Total Spent</div>
+                            <div className="expenditure-stat-value">₱{calculateTotalSpent().toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
+                        </div>
+                        <div className="expenditure-stat-card">
+                            <div className="expenditure-stat-title">Remaining</div>
+                            <div className="expenditure-stat-value">₱{calculateRemainingBudget().toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
+                        </div>
+                    </div>
+                    
+                    <div className="expenditure-action-container">
+                        <h5 className="expenditure-title">Add New Expenditure</h5>
+                    </div>
+                    
                     <Form onSubmit={handleAddExpenditure}>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Description</Form.Label>
-                            <Form.Control
-                                type="text"
-                                value={newExpenditure.description}
-                                onChange={(e) => setNewExpenditure({ ...newExpenditure, description: e.target.value })}
-                                required
-                            />
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Category</Form.Label>
-                            <Form.Select
-                                value={newExpenditure.category}
-                                onChange={(e) => setNewExpenditure({ ...newExpenditure, category: e.target.value })}
-                                required
-                            >
-                                <option value="">Select a category</option>
-                                {categories.map((category) => (
-                                    <option key={category} value={category}>
-                                        {category}
-                                    </option>
-                                ))}
-                            </Form.Select>
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Amount</Form.Label>
-                            <Form.Control
-                                type="number"
-                                step="0.01"
-                                min="0"
-                                value={newExpenditure.amount}
-                                onChange={(e) => setNewExpenditure({ ...newExpenditure, amount: e.target.value })}
-                                required
-                            />
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Date</Form.Label>
-                            <Form.Control
-                                type="date"
-                                value={newExpenditure.date}
-                                onChange={(e) => setNewExpenditure({ ...newExpenditure, date: e.target.value })}
-                                required
-                            />
-                        </Form.Group>
-                        <Button variant="primary" type="submit">
-                            Add Expenditure
-                        </Button>
+                        <div className="row">
+                            <div className="col-md-6">
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Description</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        value={newExpenditure.description}
+                                        onChange={(e) => setNewExpenditure({ ...newExpenditure, description: e.target.value })}
+                                        required
+                                    />
+                                </Form.Group>
+                            </div>
+                            <div className="col-md-6">
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Category</Form.Label>
+                                    <Form.Select
+                                        value={newExpenditure.category}
+                                        onChange={(e) => setNewExpenditure({ ...newExpenditure, category: e.target.value })}
+                                        required
+                                    >
+                                        <option value="">Select a category</option>
+                                        {categories.map((category) => (
+                                            <option key={category} value={category}>
+                                                {category}
+                                            </option>
+                                        ))}
+                                    </Form.Select>
+                                </Form.Group>
+                            </div>
+                        </div>
+                        <div className="row">
+                            <div className="col-md-6">
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Amount</Form.Label>
+                                    <Form.Control
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        value={newExpenditure.amount}
+                                        onChange={(e) => setNewExpenditure({ ...newExpenditure, amount: e.target.value })}
+                                        required
+                                    />
+                                </Form.Group>
+                            </div>
+                            <div className="col-md-6">
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Date</Form.Label>
+                                    <Form.Control
+                                        type="date"
+                                        value={newExpenditure.date}
+                                        onChange={(e) => setNewExpenditure({ ...newExpenditure, date: e.target.value })}
+                                        required
+                                    />
+                                </Form.Group>
+                            </div>
+                        </div>
+                        <div className="d-flex justify-content-end mt-4">
+                            <Button variant="secondary" onClick={() => setShowModal(false)} className="me-2">
+                                Cancel
+                            </Button>
+                            <Button variant="primary" type="submit">
+                                Add Expenditure
+                            </Button>
+                        </div>
                     </Form>
                 </Modal.Body>
             </Modal>

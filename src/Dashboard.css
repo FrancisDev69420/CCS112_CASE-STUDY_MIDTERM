@@ -277,26 +277,96 @@
 /* Custom Expenditure Modal Styles */
 @media (min-width: 1000px) {
   .modal-dialog.modal-lg.custom-expense-modal {
-    max-width: 1000px !important;
-    width: 95vw !important;
-    min-width: 800px;
+    max-width: 800px !important;
+    width: 75vw !important;
+    min-width: 600px;
   }
   .expenditure-modal-content {
-    padding: 2rem 2rem 1.5rem 2rem !important;
-    max-height: calc(100vh - 160px) !important;
+    padding: 1.5rem !important;
+    max-height: calc(100vh - 140px) !important;
   }
   .modal-lg .modal-header,
   .modal-lg .modal-footer {
-    padding: 1.5rem 2rem !important;
+    padding: 1rem 1.5rem !important;
+  }  /* Dashboard stats in modal */
+  .expenditure-stats-container {
+    display: inline-flex;
+    flex-direction: row;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+    margin-right: 1.5rem;
+    float: right;
+  }  .expenditure-stat-card {
+    padding: 0.75rem 1.25rem;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }  .expenditure-stat-title {
+    font-size: 0.9rem;
+    color: #495057;
+    margin: 0;
+  }
+  .expenditure-stat-value {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #212529;
+    white-space: nowrap;
+  }
+  /* Table improvements */
+  .expenditure-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+  }
+  .expenditure-table th {
+    background-color: #f1f3f5;
+    padding: 0.75rem 1rem;
+    font-weight: 500;
+    text-align: left;
+    border-bottom: 2px solid #dee2e6;
+  }
+  .expenditure-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #e9ecef;
+    vertical-align: middle;
+  }
+  .expenditure-table tr:hover {
+    background-color: #f8f9fa;
+  }
+  /* Action button container */
+  .expenditure-action-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+  .expenditure-title {
+    font-size: 1.25rem;
+    font-weight: 500;
+    margin: 0;
   }
 }
 
 @media (max-width: 999px) {
   .modal-dialog.modal-lg.custom-expense-modal {
-    max-width: 98vw !important;
+    max-width: 95vw !important;
     min-width: unset;
   }
   .expenditure-modal-content {
     padding: 1rem !important;
+  }  .expenditure-stats-container {
+    float: none;
+    margin-right: 0;
+    justify-content: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  .expenditure-stat-card {
+    padding: 0.75rem 1rem;
+    flex-shrink: 0;
   }
 }
