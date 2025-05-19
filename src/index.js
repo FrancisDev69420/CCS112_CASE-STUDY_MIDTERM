@@ -10,6 +10,7 @@ import Dashboard from "./components/Dashboard";
 import MemberDashboard from "./components/Member-Dashboard";
 import GanttChartPage from "./components/GanttChartPage";
 import ActivityFeedPage from "./components/ActivityFeedPage";
+import ProjectProgressPage from "./components/ProjectProgressPage";
 
 function App() {
     return (
@@ -19,9 +20,10 @@ function App() {
                     <Route path="/" element={<Login />} />
                     <Route path="/register" element={<Register />} />
                     <Route path="/dashboard" element={<Dashboard />} />
-                    <Route path="/Member-Dashboard" element={<MemberDashboard />} />
-                    <Route path="/project/:id/gantt" element={<GanttChartPage />} />
+                    <Route path="/Member-Dashboard" element={<MemberDashboard />} />                    <Route path="/project/:id/gantt" element={<GanttChartPage />} />
                     <Route path="/activities" element={<ActivityFeedPage />} />
+                    <Route path="/project-progress" element={<ProjectProgressPage />} />
+
                 </Routes>
             </Suspense>
         </Router>

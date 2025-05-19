@@ -487,8 +487,9 @@ function Dashboard() {
             <h2 className="text-center">Dashboard</h2>
             <p className="text-muted text-center">{message}</p>            
             
-            {/* Project Buttons */}
-            <div className="action-buttons">
+            {/* Project Buttons */}            
+            <div className="action-buttons">                
+            
                 <Button 
                     variant="success" 
                     onClick={() => {
@@ -500,13 +501,22 @@ function Dashboard() {
                     Add Project
                 </Button>
                 
-                <Button
-                    variant="info"
-                    onClick={() => navigate('/activities')}
-                >
-                    View Activity Feed
-                </Button>
-            </div>            {/* Conditionally render Add Task button if a project is selected */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <Button
+                        variant="info"
+                        onClick={() => navigate('/activities')}
+                    >
+                        View Activity Feed
+                    </Button>
+                    <Button
+                        variant="primary"
+                        onClick={() => navigate('/project-progress')}
+                    >
+                        Project Progress
+                    </Button>
+                </div>
+            </div>
+           
             {selectedProject && (
             <div className="action-buttons justify-content-start">
                 <Button 
