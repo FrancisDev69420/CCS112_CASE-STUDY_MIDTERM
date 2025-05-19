@@ -150,7 +150,7 @@ class CommentController extends Controller
             $paths = is_array($comment->file_paths) ? $comment->file_paths : json_decode($comment->file_paths, true);
             if (is_array($paths)) {
                 foreach ($paths as $path) {
-                    \Storage::disk('public')->delete($path);
+                    Storage::disk('public')->delete($path);
                 }
             }
         }
@@ -173,7 +173,8 @@ class CommentController extends Controller
             return response()->json(['error' => 'File not found'], 404);
         }
 
-        return \Storage::disk('public')->download($paths[$fileIndex], $names[$fileIndex]);
+        $filePath = Storage::disk('public')->path($paths[$fileIndex]);
+        return response()->download($filePath, $names[$fileIndex]);
     }
 }
 

@@ -81,6 +81,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/projects/{projectId}/tasks/{taskId}/comments/{commentId}', [CommentController::class, 'update']); // Update a comment
     Route::delete('/projects/{projectId}/tasks/{taskId}/comments/{commentId}', [CommentController::class, 'destroy']); // Delete a comment
     Route::get('/projects/{projectId}/tasks/{taskId}/comments/{commentId}/download', [CommentController::class, 'downloadFile']); // Download comment attachment
+
+    // Activity Log Routes
+    Route::get('/activities', [ActivityLogController::class, 'index']);
+    Route::get('/projects/{project}/activities', [ActivityLogController::class, 'index']);
+    Route::get('/tasks/{task}/activities', [ActivityLogController::class, 'index']);
 });
 
 // Public download route for comment attachments (must be outside auth:sanctum)
@@ -93,7 +98,3 @@ Route::get('/projects/{projectId}/expenditures/{expenditureId}', [ExpenditureCon
 Route::put('/projects/{projectId}/expenditures/{expenditureId}', [ExpenditureController::class, 'update']);
 Route::delete('/projects/{projectId}/expenditures/{expenditureId}', [ExpenditureController::class, 'destroy']);
 
-// Activity Log Routes
-Route::get('/activities', [ActivityLogController::class, 'index']);
-Route::get('/projects/{project}/activities', [ActivityLogController::class, 'index']);
-Route::get('/tasks/{task}/activities', [ActivityLogController::class, 'index']);
