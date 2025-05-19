@@ -80,6 +80,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/projects/{projectId}/tasks/{taskId}/comments/{commentId}', [CommentController::class, 'show']); // Get a specific comment
     Route::put('/projects/{projectId}/tasks/{taskId}/comments/{commentId}', [CommentController::class, 'update']); // Update a comment
     Route::delete('/projects/{projectId}/tasks/{taskId}/comments/{commentId}', [CommentController::class, 'destroy']); // Delete a comment
+    Route::get('/projects/{projectId}/tasks/{taskId}/comments/{commentId}/download', [CommentController::class, 'downloadFile']); // Download comment attachment
 
     // Expenditure routes
     Route::get('/projects/{projectId}/expenditures', [ExpenditureController::class, 'index']);
