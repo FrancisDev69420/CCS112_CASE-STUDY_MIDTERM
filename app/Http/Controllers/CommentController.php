@@ -28,31 +28,45 @@ class CommentController extends Controller
             ->findOrFail($taskId);
 
         $request->validate([
-            'content' => 'required|string|max:255',
-            'file' => 'nullable|file|max:10240', // Max 10MB file size
+            'content' => 'required_without:files|nullable|string|max:255',
+            'files' => 'required_without:content|array',
+            'files.*' => 'file|max:10240', // Max 10MB per file
         ]);
 
         $comment = new Comment([
-            'content' => $request->content,
+            'content' => $request->content ?? '',
             'user_id' => Auth::id(),
             'task_id' => $taskId
         ]);
 
-        // Handle file upload if present
-        if ($request->hasFile('file')) {
-            $file = $request->file('file');
-            $fileName = $file->getClientOriginalName();
-            $filePath = $file->store('comment-attachments', 'public');
-            
-            $comment->file_name = $fileName;
-            $comment->file_path = $filePath;
-            $comment->file_type = $file->getMimeType();
-            $comment->file_size = $file->getSize();
+        $fileNames = [];
+        $filePaths = [];
+        $fileTypes = [];
+        $fileSizes = [];
+
+        if ($request->hasFile('files')) {
+            foreach ($request->file('files') as $file) {
+                if ($file->isValid()) {
+                    $fileName = $file->getClientOriginalName();
+                    $filePath = $file->store('comment-attachments', 'public');
+                    $fileNames[] = $fileName;
+                    $filePaths[] = $filePath;
+                    $fileTypes[] = $file->getMimeType();
+                    $fileSizes[] = $file->getSize();
+                }
+            }
+        }
+
+        if (count($fileNames)) {
+            $comment->file_names = $fileNames;
+            $comment->file_paths = $filePaths;
+            $comment->file_types = $fileTypes;
+            $comment->file_sizes = $fileSizes;
         }
 
         $comment->save();
         
-        // Create notifications for project manager and task assignee
+        // Create notifications
         $notificationController = new NotificationController();
         $notificationController->createCommentNotification($comment, $task);
         
@@ -71,7 +85,8 @@ class CommentController extends Controller
     {
         $request->validate([
             'content' => 'required|string|max:255',
-            'file' => 'nullable|file|max:10240', // Max 10MB file size
+            'files' => 'nullable|array',
+            'files.*' => 'file|max:10240', // Max 10MB per file
         ]);
 
         // Validate task belongs to project
@@ -84,20 +99,36 @@ class CommentController extends Controller
         $comment->content = $request->content;
 
         // Handle file upload if present
-        if ($request->hasFile('file')) {
-            // Delete old file if exists
-            if ($comment->file_path) {
-                Storage::disk('public')->delete($comment->file_path);
+        if ($request->hasFile('files')) {
+            // Delete old files if exists
+            if ($comment->file_paths) {
+                foreach (json_decode($comment->file_paths) as $path) {
+                    Storage::disk('public')->delete($path);
+                }
             }
 
-            $file = $request->file('file');
-            $fileName = $file->getClientOriginalName();
-            $filePath = $file->store('comment-attachments', 'public');
-            
-            $comment->file_name = $fileName;
-            $comment->file_path = $filePath;
-            $comment->file_type = $file->getMimeType();
-            $comment->file_size = $file->getSize();
+            $fileNames = [];
+            $filePaths = [];
+            $fileTypes = [];
+            $fileSizes = [];
+
+            foreach ($request->file('files') as $file) {
+                if ($file->isValid()) {
+                    $fileName = $file->getClientOriginalName();
+                    $filePath = $file->store('comment-attachments', 'public');
+                    $fileNames[] = $fileName;
+                    $filePaths[] = $filePath;
+                    $fileTypes[] = $file->getMimeType();
+                    $fileSizes[] = $file->getSize();
+                }
+            }
+
+            if (count($fileNames)) {
+                $comment->file_names = $fileNames;
+                $comment->file_paths = $filePaths;
+                $comment->file_types = $fileTypes;
+                $comment->file_sizes = $fileSizes;
+            }
         }
 
         $comment->save();
@@ -114,9 +145,14 @@ class CommentController extends Controller
             ->where('user_id', Auth::id()) // Only allow deleting own comments
             ->findOrFail($commentId);
             
-        // Delete associated file if exists
-        if ($comment->file_path) {
-            Storage::disk('public')->delete($comment->file_path);
+        // Delete associated files if exist (handle arrays)
+        if ($comment->file_paths) {
+            $paths = is_array($comment->file_paths) ? $comment->file_paths : json_decode($comment->file_paths, true);
+            if (is_array($paths)) {
+                foreach ($paths as $path) {
+                    \Storage::disk('public')->delete($path);
+                }
+            }
         }
 
         $comment->delete();
@@ -124,17 +160,20 @@ class CommentController extends Controller
         return response()->json(null, 204);
     }
 
-    public function downloadFile($projectId, $taskId, $commentId)
+    public function downloadFile($projectId, $taskId, $commentId, $fileIndex)
     {
         // Validate task belongs to project
         $task = Task::where('project_id', $projectId)->findOrFail($taskId);
         $comment = Comment::where('task_id', $taskId)->findOrFail($commentId);
 
-        if (!$comment->file_path) {
-            return response()->json(['error' => 'No file attached to this comment'], 404);
+        $paths = is_array($comment->file_paths) ? $comment->file_paths : json_decode($comment->file_paths, true);
+        $names = is_array($comment->file_names) ? $comment->file_names : json_decode($comment->file_names, true);
+
+        if (!is_array($paths) || !isset($paths[$fileIndex]) || !is_array($names) || !isset($names[$fileIndex])) {
+            return response()->json(['error' => 'File not found'], 404);
         }
 
-        return Storage::disk('public')->download($comment->file_path, $comment->file_name);
+        return \Storage::disk('public')->download($paths[$fileIndex], $names[$fileIndex]);
     }
 }
 
