@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import '/CCS112_FINALS_CASE_STUDY/project_frontend/src/ActivityFeed.css'; 
+import '../ActivityFeed.css'; 
 
 
 function ActivityFeed({ projectId, taskId }) {

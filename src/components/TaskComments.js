@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import '/CCS112_FINALS_CASE_STUDY/project_frontend/src/TaskComments.css'; 
+import '../TaskComments.css'; 
 
 function TaskComments({ taskId, projectId }) {
     const [comments, setComments] = useState([]);
     const [newComment, setNewComment] = useState('');
+    const [selectedFile, setSelectedFile] = useState(null);
     const [loading, setLoading] = useState(false);
     const [editingCommentId, setEditingCommentId] = useState(null);
     const [editContent, setEditContent] = useState('');
@@ -50,17 +51,33 @@ function TaskComments({ taskId, projectId }) {
     // Handle adding a new comment
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!newComment.trim()) return;
+        if (!newComment.trim() && !selectedFile) return;
 
         setLoading(true);
         try {
+            const formData = new FormData();
+            if (newComment.trim()) {
+                formData.append('content', newComment);
+            } else {
+                formData.append('content', ''); // Send empty content if only file is attached
+            }
+            if (selectedFile) {
+                formData.append('file', selectedFile);
+            }
+
             await axios.post(
                 `http://localhost:8000/api/projects/${projectId}/tasks/${taskId}/comments`,
-                { content: newComment },
-                { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
+                formData,
+                { 
+                    headers: { 
+                        Authorization: `Bearer ${localStorage.getItem('token')}`,
+                        'Content-Type': 'multipart/form-data'
+                    } 
+                }
             );
             setNewComment('');
-            fetchComments(); // Refresh comments after adding new one
+            setSelectedFile(null);
+            fetchComments();
         } catch (error) {
             console.error('Error adding comment:', error);
         } finally {
@@ -68,6 +85,46 @@ function TaskComments({ taskId, projectId }) {
         }
     };
 
+    const handleFileSelect = (e) => {
+        if (e.target.files[0]) {
+            setSelectedFile(e.target.files[0]);
+        }
+    };
+
+    const handleRemoveFile = () => {
+        setSelectedFile(null);
+        // Reset the file input
+        const fileInput = document.querySelector('input[type="file"]');
+        if (fileInput) {
+            fileInput.value = '';
+        }
+    };
+
+    const handleDownload = async (commentId, fileName) => {
+        try {
+            const response = await axios.get(
+                `http://localhost:8000/api/projects/${projectId}/tasks/${taskId}/comments/${commentId}/download`,
+                {
+                    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+                    responseType: 'blob'
+                }
+            );
+
+            // Create blob link to download
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', fileName);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Error downloading file:', error);
+        }
+    };
+
+    // Handle editing a comment
     const handleEdit = (comment) => {
         setEditingCommentId(comment.id);
         setEditContent(comment.content);
@@ -172,7 +229,21 @@ function TaskComments({ taskId, projectId }) {
                                 </div>
                             ) : (
                                 <>
-                                    <p className="mb-0 mt-1">{comment.content}</p>
+                                    <p className="mb-1 mt-1">{comment.content}</p>
+                                    {comment.file_name && (
+                                        <div className="attachment-section mt-1">
+                                            <small className="text-muted">
+                                                📎 Attachment: 
+                                                <button 
+                                                    className="btn btn-link btn-sm p-0 ms-1"
+                                                    onClick={() => handleDownload(comment.id, comment.file_name)}
+                                                >
+                                                    {comment.file_name}
+                                                </button>
+                                                ({(comment.file_size / 1024).toFixed(1)} KB)
+                                            </small>
+                                        </div>
+                                    )}
                                     {canEditComment(comment) && (
                                         <div className="mt-1 d-flex gap-3">
                                             <button
@@ -198,7 +269,7 @@ function TaskComments({ taskId, projectId }) {
                 )}
             </div>
             <form onSubmit={handleSubmit} className="comment-form">
-                <div className="input-group">
+                <div className="input-group mb-2">
                     <input
                         type="text"
                         className="form-control"
@@ -210,10 +281,33 @@ function TaskComments({ taskId, projectId }) {
                     <button 
                         type="submit" 
                         className="btn btn-primary"
-                        disabled={loading || !newComment.trim()}
+                        disabled={loading || (!newComment.trim() && !selectedFile)}
                     >
                         {loading ? 'Posting...' : 'Post'}
                     </button>
+                </div>
+                <div className="file-upload">
+                    <input
+                        type="file"
+                        className="form-control form-control-sm"
+                        onChange={handleFileSelect}
+                        disabled={loading}
+                    />
+                    {selectedFile && (
+                        <div className="d-flex justify-content-between align-items-center mt-1">
+                            <small className="text-muted">
+                                Selected file: {selectedFile.name} ({(selectedFile.size / 1024).toFixed(1)} KB)
+                            </small>
+                            <button
+                                className="btn btn-danger btn-sm"
+                                onClick={handleRemoveFile}
+                                disabled={loading}
+                                title="Remove file"
+                            >
+                                &times;
+                            </button>
+                        </div>
+                    )}
                 </div>
             </form>
         </div>

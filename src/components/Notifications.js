@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import '/CCS112_FINALS_CASE_STUDY/project_frontend/src/Notifications.css'; 
+import '../Notifications.css'; 
 
 function Notifications() {
     const [notifications, setNotifications] = useState([]);
