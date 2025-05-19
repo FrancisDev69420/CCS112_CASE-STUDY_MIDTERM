@@ -252,20 +252,21 @@ function MemberDashboard() {
                                                                         {calculateProgress(task.actual_hours, task.estimated_hours).toFixed(2)}%
                                                                     </div>
                                                                 </div>
-                                                            </td>
-                                                            <td>
-                                                                <button
-                                                                    className="btn btn-success btn-sm me-2"
-                                                                    onClick={() => openStatusModal(project.id, task)}
-                                                                >
-                                                                    Update Status
-                                                                </button>
-                                                                <button
-                                                                    className="btn btn-info btn-sm"
-                                                                    onClick={() => toggleComments(task.id)}
-                                                                >
-                                                                    💬 {expandedComments[task.id] ? 'Hide' : 'Comments'}
-                                                                </button>
+                                                            </td>                                                            <td className="action-column">
+                                                                <div className="d-flex align-items-center">
+                                                                    <button
+                                                                        className="btn btn-success btn-sm me-2"
+                                                                        onClick={() => openStatusModal(project.id, task)}
+                                                                    >
+                                                                        Update Status
+                                                                    </button>
+                                                                    <button
+                                                                        className="btn btn-info btn-sm"
+                                                                        onClick={() => toggleComments(task.id)}
+                                                                    >
+                                                                        💬 {expandedComments[task.id] ? 'Hide' : 'Comments'}
+                                                                    </button>
+                                                                </div>
                                                             </td>
                                                         </tr>
                                                         {expandedComments[task.id] && (

@@ -32,6 +32,28 @@
     vertical-align: middle;
 }
 
+/* Action column specific styles */
+.table td:last-child {
+    white-space: nowrap;
+    min-width: 240px;
+    padding: 12px;
+}
+
+.table td:last-child .btn-sm {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    margin: 0 0.25rem;
+}
+
+.table td:last-child .btn-sm:first-child {
+    margin-left: 0;
+}
+
+.table td:last-child .btn-sm:last-child {
+    margin-right: 0;
+}
+
 /* Progress bar styles */
 .progress {
     height: 0.75rem;
@@ -155,6 +177,16 @@
     /* Badge mobile adjustments */
     .badge {
         padding: 0.35em 0.65em;
+        font-size: 0.75rem;
+    }
+
+    .table td:last-child {
+        min-width: 200px;
+        padding: 8px;
+    }
+
+    .table td:last-child .btn-sm {
+        padding: 0.25rem 0.5rem;
         font-size: 0.75rem;
     }
 }
