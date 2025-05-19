@@ -12,6 +12,7 @@ import GanttChartPage from "./components/GanttChartPage";
 import ActivityFeedPage from "./components/ActivityFeedPage";
 import ProjectProgressPage from "./components/ProjectProgressPage";
 import RiskAndIssueManagement from "./pages/RiskAndIssueManagement";
+import FileManagement from "./pages/FileManagement";
 
 function App() {
     return (
@@ -26,6 +27,7 @@ function App() {
                     <Route path="/activities" element={<ActivityFeedPage />} />
                     <Route path="/project-progress" element={<ProjectProgressPage />} />
                     <Route path="/projects/:projectId/risks-issues" element={<RiskAndIssueManagement />} />
+                    <Route path="/projects/:projectId/files" element={<FileManagement />} />
                 </Routes>
             </Suspense>
         </Router>

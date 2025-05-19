@@ -850,12 +850,21 @@ function Dashboard() {
                             <div className="d-flex justify-content-between align-items-center mb-2">
                                 <h2>Tasks</h2>
                                 {selectedProjectId && (
-                                    <button
-                                        className="btn btn-warning"
-                                        onClick={() => navigate(`/projects/${selectedProjectId}/risks-issues`)}
-                                    >
-                                        Manage Risks & Issues
-                                    </button>
+                                    <>
+                                        <button
+                                            className="btn btn-warning"
+                                            onClick={() => navigate(`/projects/${selectedProjectId}/risks-issues`)}
+                                        >
+                                            Manage Risks & Issues
+                                        </button>
+                                        <button
+                                            className="btn btn-info"
+                                            style={{ marginLeft: '10px' }}
+                                            onClick={() => navigate(`/projects/${selectedProjectId}/files`)}
+                                        >
+                                            Manage Files
+                                        </button>
+                                    </>
                                 )}
                             </div>
                             <Tasks

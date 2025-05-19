@@ -210,6 +210,7 @@ const RiskAndIssueManagement = () => {
             <div className="header">
                 <Button variant="secondary" className="back-button" onClick={() => navigate(-1)}>Back</Button>
                 <h1>Risk and Issue Management</h1>
+                <Button variant="primary" onClick={() => navigate(`/projects/${projectId}/files`)}>Manage Files</Button>
             </div>
 
             <div className="box">
