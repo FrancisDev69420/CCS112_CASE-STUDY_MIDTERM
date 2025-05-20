@@ -26,6 +26,7 @@ const RiskAndIssueManagement = () => {
     const [users, setUsers] = useState([]);
     const [message, setMessage] = useState('');
     const [showMessage, setShowMessage] = useState(false);
+    const [userRole, setUserRole] = useState(localStorage.getItem('userRole') || ''); // Initialize userRole state
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -42,6 +43,11 @@ const RiskAndIssueManagement = () => {
         axios.get(`http://127.0.0.1:8000/api/users`, { headers })
             .then(response => setUsers(response.data))
             .catch(error => setUsers([]));
+
+        // Fetch user role
+        axios.get(`http://127.0.0.1:8000/api/user`, { headers }) // Corrected endpoint
+            .then(response => setUserRole(response.data.role))
+            .catch(error => console.error('Error fetching user role:', error));
     }, [projectId]);
 
     useEffect(() => {
@@ -228,7 +234,9 @@ const RiskAndIssueManagement = () => {
                                 </div>
                                 <div className="item-actions">
                                     <Button variant="info" className="action-button" onClick={() => handleViewRisk(risk)}>View</Button>
-                                    <Button variant="warning" className="action-button" onClick={() => handleEditRisk(risk)}>Edit</Button>
+                                    {userRole === 'Project Manager' && (
+                                        <Button variant="warning" className="action-button" onClick={() => handleEditRisk(risk)}>Edit</Button>
+                                    )}
                                     <Button variant="danger" className="action-button" onClick={() => deleteRisk(risk.id)}>Delete</Button>
                                 </div>
                             </li>
@@ -249,10 +257,13 @@ const RiskAndIssueManagement = () => {
                                 <div className="item-content">
                                     <span className="item-title">{issue.title}</span>
                                     <span className={`item-status ${issue.status.toLowerCase().replace(/\s+/g, '-')}`}>{issue.status}</span>
+                                    <span className="item-assigned"><b>Assigned to: </b>{users.find(user => user.id === issue.assigned_user_id)?.name || 'Unassigned'}</span>
                                 </div>
                                 <div className="item-actions">
                                     <Button variant="info" className="action-button" onClick={() => handleViewIssue(issue)}>View</Button>
-                                    <Button variant="warning" className="action-button" onClick={() => handleEditIssue(issue)}>Edit</Button>
+                                    {userRole === 'Project Manager' && (
+                                        <Button variant="warning" className="action-button" onClick={() => handleEditIssue(issue)}>Edit</Button>
+                                    )}
                                     <Button variant="danger" className="action-button" onClick={() => deleteIssue(issue.id)}>Delete</Button>
                                 </div>
                             </li>

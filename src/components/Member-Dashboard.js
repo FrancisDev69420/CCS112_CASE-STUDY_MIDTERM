@@ -160,11 +160,11 @@ function MemberDashboard() {
                     <button className="btn btn-danger" onClick={handleLogout}>Logout</button>
                 </div>
             </div>            
-            
+
             <h2 className="text-center">Member Dashboard</h2>
             <p className="text-muted text-center">{message}</p>
-
-            <div className="d-flex justify-content-start mb-3">
+            <div className="d-flex mb-2 justify-content-between align-items-center">
+                <h4 className="mb-4">Projects and Tasks</h4>
                 <Button
                     variant="info"
                     onClick={() => navigate('/activities')}
@@ -173,7 +173,6 @@ function MemberDashboard() {
                 </Button>
             </div>
 
-            <h4 className="mb-4">Projects and Tasks</h4>
             {projects.length === 0 ? (
                 <p>No projects assigned to you yet.</p>
             ) : (
@@ -190,6 +189,21 @@ function MemberDashboard() {
 
                         {expandedProjects[project.title] && (
                             <div className="card-body">
+                                <div className="d-flex justify-content-end mt-3">
+                                    <button
+                                        className="btn btn-info me-2"
+                                        onClick={() => navigate(`/projects/${project.id}/risks-issues`)}
+                                    >
+                                        Manage Risk and Issues
+                                    </button>
+                                    <button
+                                        className="btn btn-info"
+                                        onClick={() => navigate(`/projects/${project.id}/files`)}
+                                    >
+                                        Manage Files
+                                    </button>
+                                </div>
+
                                 {project.tasks.length === 0 ? (
                                     <p>No tasks assigned.</p>
                                 ) : (
@@ -282,6 +296,7 @@ function MemberDashboard() {
                                         </table>
                                     </div>
                                 )}
+                                
                             </div>
                         )}
                     </div>

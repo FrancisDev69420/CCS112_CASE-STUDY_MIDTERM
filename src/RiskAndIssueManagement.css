@@ -108,3 +108,8 @@
     font-size: 14px;
     z-index: 1000;
 }
+
+.item-assigned{
+    padding: 3px ;
+    background-color: rgb(209, 209, 209);
+}

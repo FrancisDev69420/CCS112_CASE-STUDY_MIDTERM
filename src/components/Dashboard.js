@@ -852,7 +852,7 @@ function Dashboard() {
                                 {selectedProjectId && (
                                     <div>
                                         <button
-                                            className="btn btn-warning"
+                                            className="btn btn-info"
                                             onClick={() => navigate(`/projects/${selectedProjectId}/risks-issues`)}
                                         >
                                             Manage Risks & Issues
