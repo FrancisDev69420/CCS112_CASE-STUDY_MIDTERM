@@ -207,10 +207,10 @@ const RiskAndIssueManagement = () => {
 
     return (
         <div className="risk-issue-management">
-            <div className="header">
-                <Button variant="secondary" className="back-button" onClick={() => navigate(-1)}>Back</Button>
+            
+            <Button variant="secondary" className="back-button" onClick={() => navigate(-1)}>Back</Button>
+            <div className="header1">
                 <h1>Risk and Issue Management</h1>
-                <Button variant="primary" onClick={() => navigate(`/projects/${projectId}/files`)}>Manage Files</Button>
             </div>
 
             <div className="box">
@@ -224,7 +224,7 @@ const RiskAndIssueManagement = () => {
                             <li key={risk.id} className="list-item">
                                 <div className="item-content">
                                     <span className="item-title">{risk.title}</span>
-                                    <span className="item-status">{risk.status}</span>
+                                    <span className={`item-status ${risk.status.toLowerCase().replace(/\s+/g, '-')}`}>{risk.status}</span>
                                 </div>
                                 <div className="item-actions">
                                     <Button variant="info" className="action-button" onClick={() => handleViewRisk(risk)}>View</Button>
@@ -248,7 +248,7 @@ const RiskAndIssueManagement = () => {
                             <li key={issue.id} className="list-item">
                                 <div className="item-content">
                                     <span className="item-title">{issue.title}</span>
-                                    <span className="item-status">{issue.status}</span>
+                                    <span className={`item-status ${issue.status.toLowerCase().replace(/\s+/g, '-')}`}>{issue.status}</span>
                                 </div>
                                 <div className="item-actions">
                                     <Button variant="info" className="action-button" onClick={() => handleViewIssue(issue)}>View</Button>

@@ -847,10 +847,10 @@ function Dashboard() {
                     {/* Tasks List */}
                     {selectedProject && (
                         <div className="card mt-3 p-3 shadow-sm">
-                            <div className="d-flex justify-content-between align-items-center mb-2">
+                            <div className="d-flex mb-2 justify-content-between align-items-center">
                                 <h2>Tasks</h2>
                                 {selectedProjectId && (
-                                    <>
+                                    <div>
                                         <button
                                             className="btn btn-warning"
                                             onClick={() => navigate(`/projects/${selectedProjectId}/risks-issues`)}
@@ -864,7 +864,7 @@ function Dashboard() {
                                         >
                                             Manage Files
                                         </button>
-                                    </>
+                                    </div>
                                 )}
                             </div>
                             <Tasks

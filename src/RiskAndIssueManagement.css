@@ -1,62 +1,37 @@
 .risk-issue-management {
+    padding: 20px;
+    font-family: Arial, sans-serif;
     max-width: 1200px;
     margin: 0 auto;
-    padding: 20px;
-    background-color: #f8f9fa;
-    min-height: 100vh;
 }
 
-.header {
-    display: flex;
-    align-items: center;
-    margin-bottom: 30px;
-    padding: 20px;
-    background: #fff;
-    border-radius: 10px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-
-.header h1 {
-    margin: 0;
-    margin-left: 20px;
+.header1 {
+    text-align: center;
+    margin-bottom: 20px;
     font-size: 24px;
-    color: #2c3e50;
-}
-
-.back-button {
-    padding: 8px 16px;
-    font-size: 14px;
-    border-radius: 6px;
+    font-weight: bold;
 }
 
 .box {
-    background: #fff;
-    border-radius: 10px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    margin-bottom: 25px;
-    transition: transform 0.2s;
-}
-
-.box:hover {
-    transform: translateY(-2px);
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    background-color: #fefefe;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .section-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px;
-    border-bottom: 1px solid #eee;
-}
-
-.section-header h2 {
-    font-size: 20px;
-    color: #2c3e50;
-    margin: 0;
+    margin-bottom: 10px;
+    font-size: 18px;
+    font-weight: bold;
 }
 
 .list {
-    list-style: none;
+    list-style-type: none;
     padding: 0;
     margin: 0;
 }
@@ -65,180 +40,71 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 15px 20px;
-    border-bottom: 1px solid #eee;
-    transition: background-color 0.2s;
-}
-
-.list-item:last-child {
-    border-bottom: none;
-}
-
-.list-item:hover {
-    background-color: #f8f9fa;
-}
-
-.item-content {
-    flex: 1;
-    margin-right: 20px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    background-color: #f9f9f9;
 }
 
 .item-title {
-    display: block;
-    font-weight: 500;
-    color: #2c3e50;
-    margin-bottom: 5px;
+    font-weight: bold;
+    flex: 1;
 }
 
 .item-status {
-    display: inline-block;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: 500;
-    background: #e9ecef;
-    color: #495057;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 5px 10px;
+    border-radius: 5px;
+    color: white;
+    font-weight: bold;
+    min-width: 80px;
+    height: auto;
+    background-color: #cab9b9; /* Light gray background */
 }
 
-.action-button {
-    padding: 6px 12px;
-    margin-left: 8px;
-    border-radius: 6px;
-    font-size: 13px;
-    font-weight: 500;
-    transition: all 0.2s;
+/* Dynamic background colors for status */
+.item-status.identified {
+    background-color: #ffcccc; /* Light red */
+    color: #990000; /* Dark red */
 }
 
-.action-button:hover {
-    transform: translateY(-1px);
+.item-status.resolved {
+    background-color: #ccffcc; /* Light green */
+    color: #006600; /* Dark green */
 }
 
-.modal-title {
-    font-size: 20px;
-    color: #2c3e50;
+.item-status.open {
+    background-color: #f8f8a6; /* Light yellow */
+    color: #999900; /* Dark yellow */
 }
 
-.modal-body {
-    padding: 20px;
+.item-status.in-progress {
+    background-color: #cce5ff; /* Light blue */
+    color: #004085; /* Dark blue */
 }
 
-.form-label {
-    font-weight: 500;
-    color: #495057;
+.item-actions {
+    flex: 1.5;
+    text-align: right;
 }
 
-.form-control {
-    border-radius: 6px;
-    border: 1px solid #ced4da;
-    padding: 8px 12px;
-}
-
-.form-control:focus {
-    border-color: #80bdff;
-    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
-}
-
-.item-status[value="Identified"], 
-.item-status[value="Open"] {
-    background: #fff3cd;
-    color: #856404;
-}
-
-.item-status[value="Resolved"],
-.item-status[value="Completed"] {
-    background: #d4edda;
-    color: #155724;
-}
-
-.item-status[value="In Progress"] {
-    background: #cce5ff;
-    color: #004085;
+.item-actions button {
+    margin-left: 5px;
 }
 
 .notification-message {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    padding: 15px 25px;
-    background-color: #28a745;
+    background-color: #4caf50; /* Green background */
     color: white;
+    padding: 10px 20px;
     border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    font-size: 14px;
     z-index: 1000;
-    animation: slideIn 0.3s ease-out;
-}
-
-@keyframes slideIn {
-    from {
-        transform: translateX(100%);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
-}
-
-@media (max-width: 768px) {
-    .risk-issue-management {
-        padding: 10px;
-    }
-
-    .header {
-        flex-direction: column;
-        text-align: center;
-        padding: 15px;
-    }
-
-    .header h1 {
-        margin-left: 0;
-        margin-top: 10px;
-    }
-
-    .section-header {
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    .list-item {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .item-content {
-        margin-right: 0;
-        margin-bottom: 10px;
-        width: 100%;
-    }
-
-    .item-actions {
-        display: flex;
-        width: 100%;
-        justify-content: flex-end;
-        margin-top: 10px;
-    }
-
-    .action-button {
-        flex: 1;
-        text-align: center;
-    }
-}
-
-@media (max-width: 480px) {
-    .header h1 {
-        font-size: 20px;
-    }
-
-    .section-header h2 {
-        font-size: 18px;
-    }
-
-    .item-title {
-        font-size: 14px;
-    }
-
-    .action-button {
-        font-size: 12px;
-        padding: 4px 8px;
-    }
 }

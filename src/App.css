@@ -1,3 +1,6 @@
+/* Importing styles for File Management and Risk & Issue Management */
+@import './FileManagement.css';
+@import './RiskAndIssueManagement.css';
 
 .custom-table-header {
     background: linear-gradient(to right, #6a1b9a, #d32f2f, #f57c00); 

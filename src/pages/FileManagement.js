@@ -43,14 +43,26 @@ const FileManagement = () => {
     const handleFileChange = (e) => setFile(e.target.files[0]);
     const handleAccessChange = (e) => setAccessLevel(e.target.value);
 
+    const validateUploadForm = () => {
+        if (!file) {
+            alert('Please select a file to upload.');
+            return false;
+        }
+        return true;
+    };
+
     const handleUpload = (e) => {
         e.preventDefault();
+        if (!validateUploadForm()) return;
+
         const token = localStorage.getItem('token');
         const headers = { Authorization: `Bearer ${token}` };
         const formData = new FormData();
         formData.append('file', file);
         formData.append('access_level', accessLevel);
-        formData.append('assigned_user_ids', JSON.stringify(uploadAssignedUserIds)); // Include assigned users during upload
+        if (accessLevel === 'restricted') {
+            formData.append('assigned_user_ids', JSON.stringify(uploadAssignedUserIds));
+        }
 
         axios.post(`http://127.0.0.1:8000/api/projects/${projectId}/files`, formData, { headers })
             .then(response => {
@@ -58,6 +70,7 @@ const FileManagement = () => {
                 setShowUploadModal(false);
                 setFile(null);
                 setAccessLevel('restricted');
+                setUploadAssignedUserIds([]); // Clear assigned users after upload
                 fetchFileMembers(response.data.id); // Fetch members after upload
             })
             .catch(error => alert('Error uploading file'));
@@ -123,6 +136,10 @@ const FileManagement = () => {
     const handleUploadUserSelection = (e) => {
         const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
         setUploadAssignedUserIds(selectedOptions);
+
+        // Update the user names for display
+        const selectedUsers = selectedOptions.map(userId => users.find(user => user.id === userId));
+        setFileMembers(selectedUsers);
     };
 
     const fetchFileMembers = (fileId) => {
@@ -160,17 +177,22 @@ const FileManagement = () => {
 
     return (
         <div className="file-management">
+            <h1>File Management</h1>
             <div className="header">
                 <Button variant="secondary" onClick={() => navigate(-1)}>Back</Button>
-                <h1>File Management</h1>
                 <Button variant="primary" onClick={() => setShowUploadModal(true)}>Upload File</Button>
             </div>
 
+            <div className="file-list-header">
+                <span>File Name</span>
+                <span>Access Level</span>
+                <span>Actions</span>
+            </div>
             <ul className="file-list">
                 {files.map(file => (
                     <li key={file.id} className="file-item">
                         <span>{file.name}</span>
-                        <span>{file.access_level}</span>
+                        <span className={`access-level ${file.access_level}`}>{file.access_level}</span>
                         <div className="actions">
                             <Button variant="info" onClick={() => handleDownload(file.id)}>Download</Button>
                             <Button variant="warning" onClick={() => handleEditAccess(file)}>Edit Access</Button>
@@ -197,42 +219,7 @@ const FileManagement = () => {
                                 <option value="everyone">Everyone</option>
                             </Form.Select>
                         </Form.Group>
-                        {accessLevel === 'restricted' && (
-                            <>
-                                <Form.Group>
-                                    <Form.Label>Share member</Form.Label>
-                                    <Form.Select onChange={(e) => {
-                                        const userId = e.target.value;
-                                        if (userId && !uploadAssignedUserIds.includes(userId)) {
-                                            setUploadAssignedUserIds([...uploadAssignedUserIds, userId]);
-                                        }
-                                    }}>
-                                        <option value="">Select a user</option>
-                                        {users.map(user => (
-                                            <option key={user.id} value={user.id}>{user.name}</option>
-                                        ))}
-                                    </Form.Select>
-                                </Form.Group>
-                                <div>
-                                    <h5>People with access</h5>
-                                    <ul className="list-group">
-                                        {uploadAssignedUserIds.map(userId => {
-                                            const user = users.find(u => u.id === userId);
-                                            return (
-                                                <li key={userId} className="list-group-item d-flex justify-content-between align-items-center">
-                                                    {user?.name || 'Unknown User'}
-                                                    <Button variant="danger" size="sm" onClick={() => {
-                                                        setUploadAssignedUserIds(uploadAssignedUserIds.filter(id => id !== userId));
-                                                    }}>
-                                                        Remove
-                                                    </Button>
-                                                </li>
-                                            );
-                                        })}
-                                    </ul>
-                                </div>
-                            </>
-                        )}
+                        
                     </Modal.Body>
                     <Modal.Footer>
                         <Button variant="secondary" onClick={() => setShowUploadModal(false)}>Cancel</Button>
