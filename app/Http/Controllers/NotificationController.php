@@ -114,6 +114,94 @@ class NotificationController extends Controller
         }
     }
 
+    public function createRiskNotification($risk, $action, $user)
+    {
+        // Create notification for project manager if the action was taken by someone else
+        if ($risk->project->user_id !== $user->id) {
+            Notification::create([
+                'user_id' => $risk->project->user_id,
+                'type' => 'risk_' . $action,
+                'project_id' => $risk->project_id,
+                'message' => "{$user->name} " . ($action === 'create' ? 'identified' : ($action === 'update' ? 'updated' : 'resolved')) . " risk: {$risk->title}",
+                'data' => [
+                    'project_id' => $risk->project_id,
+                    'risk_id' => $risk->id,
+                    'actor_id' => $user->id
+                ]
+            ]);
+        }
+    }
+
+    public function createIssueNotification($issue, $action, $user)
+    {
+        // Create notification for project manager if the action was taken by someone else
+        if ($issue->project->user_id !== $user->id) {
+            Notification::create([
+                'user_id' => $issue->project->user_id,
+                'type' => 'issue_' . $action,
+                'project_id' => $issue->project_id,
+                'message' => "{$user->name} " . ($action === 'create' ? 'reported' : ($action === 'update' ? 'updated' : 'resolved')) . " issue: {$issue->title}",
+                'data' => [
+                    'project_id' => $issue->project_id,
+                    'issue_id' => $issue->id,
+                    'actor_id' => $user->id
+                ]
+            ]);
+        }
+
+        // If issue is assigned to someone and they're not the one taking the action
+        if ($issue->assigned_to && $issue->assigned_to !== $user->id) {
+            Notification::create([
+                'user_id' => $issue->assigned_to,
+                'type' => 'issue_' . $action,
+                'project_id' => $issue->project_id,
+                'message' => "{$user->name} " . ($action === 'create' ? 'assigned you to' : ($action === 'update' ? 'updated' : 'resolved')) . " issue: {$issue->title}",
+                'data' => [
+                    'project_id' => $issue->project_id,
+                    'issue_id' => $issue->id,
+                    'actor_id' => $user->id
+                ]
+            ]);
+        }
+    }
+
+    public function createFileNotification($file, $action, $user)
+    {
+        // Create notification for project manager if the action was taken by someone else
+        if ($file->project->user_id !== $user->id) {
+            Notification::create([
+                'user_id' => $file->project->user_id,
+                'type' => 'file_' . $action,
+                'project_id' => $file->project_id,
+                'message' => "{$user->name} " . ($action === 'upload' ? 'uploaded' : ($action === 'update' ? 'updated access for' : 'deleted')) . " file: {$file->name}",
+                'data' => [
+                    'project_id' => $file->project_id,
+                    'file_id' => $file->id,
+                    'actor_id' => $user->id
+                ]
+            ]);
+        }
+
+        // For file access updates, notify users who were given access
+        if ($action === 'update' && $file->users) {
+            foreach ($file->users as $fileUser) {
+                if ($fileUser->id !== $user->id) {
+                    Notification::create([
+                        'user_id' => $fileUser->id,
+                        'type' => 'file_access',
+                        'project_id' => $file->project_id,
+                        'message' => "{$user->name} granted you access to file: {$file->name}",
+                        'data' => [
+                            'project_id' => $file->project_id,
+                            'file_id' => $file->id,
+                            'actor_id' => $user->id
+                        ]
+                    ]);
+                }
+            }
+        }
+    }
+
     public function destroy($id)
     {
         $notification = Notification::where('user_id', Auth::id())

@@ -160,10 +160,8 @@ class CommentController extends Controller
         return response()->json(null, 204);
     }
 
-    public function downloadFile($projectId, $taskId, $commentId, $fileIndex)
+    public function downloadFile($taskId, $commentId, $fileIndex)
     {
-        // Validate task belongs to project
-        $task = Task::where('project_id', $projectId)->findOrFail($taskId);
         $comment = Comment::where('task_id', $taskId)->findOrFail($commentId);
 
         $paths = is_array($comment->file_paths) ? $comment->file_paths : json_decode($comment->file_paths, true);

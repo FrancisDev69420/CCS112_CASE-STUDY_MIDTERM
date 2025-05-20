@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Project;
+use App\Http\Controllers\ActivityLogController;
 
 class ProjectController extends Controller
 {
@@ -27,6 +28,16 @@ class ProjectController extends Controller
 
             // Create the project with all the validated data
             $project = Project::create($request->all());
+
+            // Log the project creation activity
+            $activityLogController = new ActivityLogController();
+            $activityLogController->store([
+                'project_id' => $project->id,
+                'activity_type' => 'project_created',
+                'description' => "Created new project: {$project->title}",
+                'new_values' => $project->toArray()
+            ]);
+
             return response()->json($project, 201);
 
         } catch (\Exception $e) {
@@ -44,6 +55,7 @@ class ProjectController extends Controller
     {
         try {
             $project = Project::findOrFail($id);
+            $oldValues = $project->toArray();
 
             // Validate the request before updating
             $request->validate([
@@ -57,6 +69,17 @@ class ProjectController extends Controller
 
             // Update the project with the new data
             $project->update($request->all());
+
+            // Log the project update activity
+            $activityLogController = new ActivityLogController();
+            $activityLogController->store([
+                'project_id' => $project->id,
+                'activity_type' => 'project_updated',
+                'description' => "Updated project: {$project->title}",
+                'old_values' => $oldValues,
+                'new_values' => $project->toArray()
+            ]);
+
             return response()->json($project);
 
         } catch (\Exception $e) {
@@ -67,7 +90,19 @@ class ProjectController extends Controller
     public function destroy($id)
     {
         try {
-            Project::findOrFail($id)->delete();
+            $project = Project::findOrFail($id);
+            $projectDetails = $project->toArray();
+            
+            // Store activity log before deleting
+            $activityLogController = new ActivityLogController();
+            $activityLogController->store([
+                'project_id' => $id,
+                'activity_type' => 'project_deleted',
+                'description' => "Deleted project: {$project->title}",
+                'old_values' => $projectDetails
+            ]);
+
+            $project->delete();
             return response()->json(['message' => 'Project deleted successfully']);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);

@@ -46,4 +46,12 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    /**
+     * Get the files uploaded by the user.
+     */
+    public function uploadedFiles()
+    {
+        return $this->hasMany(File::class, 'uploader_id');
+    }
 }
