@@ -17,34 +17,56 @@
 }
 
 .file-list {
-    list-style: none;
-    padding: 0;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.file-list-header {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 2fr;
+    background-color: #f8f9fa;
+    font-weight: bold;
+    border-bottom: 2px solid #dee2e6;
+    padding: 12px;
+}
+
+.file-items {
+    max-height: 600px;
+    overflow-y: auto;
 }
 
 .file-item {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 2fr;
     align-items: center;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    margin-bottom: 10px;
-    background-color: #f9f9f9;
+    padding: 12px;
+    border-bottom: 1px solid #dee2e6;
+    background-color: white;
+    transition: background-color 0.2s;
 }
 
-.file-item span {
-    flex: 1;
-    margin-right: 10px;
+.file-item:hover {
+    background-color: #f8f9fa;
+}
+
+.file-cell {
+    padding: 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .actions {
     display: flex;
+    gap: 8px;
+    justify-content: flex-start;
     flex-wrap: wrap;
-    gap: 5px;
 }
 
 .actions button {
-    margin-left: 5px;
+    padding: 4px 12px;
+    font-size: 0.9rem;
 }
 
 .modal-body {
@@ -59,32 +81,6 @@
     align-items: center;
 }
 
-.file-list-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px;
-    font-weight: bold;
-    background-color: #f1f1f1;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    margin-bottom: 10px;
-}
-
-.file-list-header span, .file-item span {
-    flex: 1;
-    text-align: left;
-}
-
-.file-list-header span:nth-child(2), .file-item span:nth-child(2) {
-    flex: 1.5;
-    text-align: center;
-}
-
-.file-list-header span:nth-child(3), .file-item span:nth-child(3) {
-    flex: 1;
-    text-align: right;
-}
 
 .file-item span.access-level {
     padding: 2px 5px; /* Minimal padding */
@@ -106,6 +102,7 @@ span.access-level.restricted, span.access-level.everyone {
     margin-right: 170px; /* Margin to the right */
     margin-bottom: 10px;
 }
+
 .file-item span.access-level.everyone {
     background-color: #4caf50; /* Green for everyone */
 }
@@ -125,6 +122,6 @@ span.access-level.restricted, span.access-level.everyone {
     }
 
     .file-list-header {
-        display: none; /* Hide the header in mobile view */
+        display: none; 
     }
 }

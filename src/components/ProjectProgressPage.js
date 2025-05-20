@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { Container, Row, Col, Card, ProgressBar, Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
@@ -6,24 +6,9 @@ import logo from "../assets/klick logo.png";
 
 function ProjectProgressPage() {
     const [projects, setProjects] = useState([]);
-    const navigate = useNavigate();    useEffect(() => {
-        const token = localStorage.getItem("token");
-        if (!token) {
-            navigate("/");
-            return;
-        }
+    const navigate = useNavigate();
 
-        // Initial fetch
-        fetchProjects();
-
-        // Set up periodic refresh every 30 seconds
-        const intervalId = setInterval(fetchProjects, 30000);
-
-        // Cleanup interval on component unmount
-        return () => clearInterval(intervalId);
-    }, [navigate]);
-
-    const fetchProjectDetails = async (projectId) => {
+    const fetchProjectDetails = useCallback(async (projectId) => {
         try {
             const response = await axios.get(`http://127.0.0.1:8000/api/projects/${projectId}/tasks`, {
                 headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
@@ -33,14 +18,27 @@ function ProjectProgressPage() {
             console.error(`Error fetching tasks for project ${projectId}:`, error);
             return [];
         }
-    };
+    }, []);
 
-    const fetchProjects = async () => {
+    const fetchProjectExpenditures = useCallback(async (projectId) => {
+        try {
+            const response = await axios.get(`http://127.0.0.1:8000/api/projects/${projectId}/expenditures`, {
+                headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+            });
+            return response.data || [];
+        } catch (error) {
+            console.error(`Error fetching expenditures for project ${projectId}:`, error);
+            return [];
+        }
+    }, []);
+
+    const fetchProjects = useCallback(async () => {
         try {
             const response = await axios.get("http://127.0.0.1:8000/api/dashboard", {
                 headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
             });
-              // Get all projects
+            
+            // Get all projects
             const projectsData = response.data.projects || [];
             
             // Fetch tasks and expenditures for each project
@@ -60,7 +58,24 @@ function ProjectProgressPage() {
         } catch (error) {
             console.error("Error fetching projects:", error);
         }
-    };
+    }, [fetchProjectDetails, fetchProjectExpenditures]);
+
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            navigate("/");
+            return;
+        }
+
+        // Initial fetch
+        fetchProjects();
+
+        // Set up periodic refresh every 30 seconds
+        const intervalId = setInterval(fetchProjects, 30000);
+
+        // Cleanup interval on component unmount
+        return () => clearInterval(intervalId);
+    }, [navigate, fetchProjects]);
 
     const calculateTaskProgress = (project) => {
         if (!project.tasks || project.tasks.length === 0) return 0;
@@ -82,18 +97,6 @@ function ProjectProgressPage() {
         return Math.round((current / total) * 100);
     };    
     
-    const fetchProjectExpenditures = async (projectId) => {
-        try {
-            const response = await axios.get(`http://127.0.0.1:8000/api/projects/${projectId}/expenditures`, {
-                headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
-            });
-            return response.data || [];
-        } catch (error) {
-            console.error(`Error fetching expenditures for project ${projectId}:`, error);
-            return [];
-        }
-    };
-
     const calculateBudgetProgress = (project) => {
         if (!project.budget || project.budget === 0) return 0;
         const spent = project.expenditures?.reduce((sum, exp) => sum + parseFloat(exp.amount), 0) || 0;

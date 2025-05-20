@@ -231,13 +231,12 @@ const RiskAndIssueManagement = () => {
                                 <div className="item-content">
                                     <span className="item-title">{risk.title}</span>
                                     <span className={`item-status ${risk.status.toLowerCase().replace(/\s+/g, '-')}`}>{risk.status}</span>
-                                </div>
-                                <div className="item-actions">
+                                </div>                                <div className="item-actions">
                                     <Button variant="info" className="action-button" onClick={() => handleViewRisk(risk)}>View</Button>
+                                    <Button variant="warning" className="action-button" onClick={() => handleEditRisk(risk)}>Edit</Button>
                                     {userRole === 'Project Manager' && (
-                                        <Button variant="warning" className="action-button" onClick={() => handleEditRisk(risk)}>Edit</Button>
+                                        <Button variant="danger" className="action-button" onClick={() => deleteRisk(risk.id)}>Delete</Button>
                                     )}
-                                    <Button variant="danger" className="action-button" onClick={() => deleteRisk(risk.id)}>Delete</Button>
                                 </div>
                             </li>
                         ))}
@@ -258,13 +257,12 @@ const RiskAndIssueManagement = () => {
                                     <span className="item-title">{issue.title}</span>
                                     <span className={`item-status ${issue.status.toLowerCase().replace(/\s+/g, '-')}`}>{issue.status}</span>
                                     <span className="item-assigned"><b>Assigned to: </b>{users.find(user => user.id === issue.assigned_user_id)?.name || 'Unassigned'}</span>
-                                </div>
-                                <div className="item-actions">
+                                </div>                                <div className="item-actions">
                                     <Button variant="info" className="action-button" onClick={() => handleViewIssue(issue)}>View</Button>
+                                    <Button variant="warning" className="action-button" onClick={() => handleEditIssue(issue)}>Edit</Button>
                                     {userRole === 'Project Manager' && (
-                                        <Button variant="warning" className="action-button" onClick={() => handleEditIssue(issue)}>Edit</Button>
+                                        <Button variant="danger" className="action-button" onClick={() => deleteIssue(issue.id)}>Delete</Button>
                                     )}
-                                    <Button variant="danger" className="action-button" onClick={() => deleteIssue(issue.id)}>Delete</Button>
                                 </div>
                             </li>
                         ))}
@@ -485,8 +483,7 @@ const RiskAndIssueManagement = () => {
                 </Modal.Footer>
             </Modal>
 
-            {showMessage && (
-                <div className="notification-message">
+            {showMessage && (                <div className="success-toast-message">
                     {message}
                 </div>
             )}

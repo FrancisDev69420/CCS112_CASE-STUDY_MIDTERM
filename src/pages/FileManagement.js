@@ -23,7 +23,10 @@ const FileManagement = () => {
         const headers = { Authorization: `Bearer ${token}` };
 
         axios.get(`http://127.0.0.1:8000/api/projects/${projectId}/files`, { headers })
-            .then(response => setFiles(response.data))
+            .then(response => {
+                console.log('File data:', response.data); // Add this for debugging
+                setFiles(response.data);
+            })
             .catch(error => console.error('Error fetching files:', error));
     }, [projectId]);
 
@@ -74,32 +77,52 @@ const FileManagement = () => {
                 fetchFileMembers(response.data.id); // Fetch members after upload
             })
             .catch(error => alert('Error uploading file'));
-    };
+    };    const handleDelete = (fileId) => {
+        if (!window.confirm('Are you sure you want to delete this file?')) {
+            return;
+        }
 
-    const handleDelete = (fileId) => {
         const token = localStorage.getItem('token');
         const headers = { Authorization: `Bearer ${token}` };
 
         axios.delete(`http://127.0.0.1:8000/api/projects/${projectId}/files/${fileId}`, { headers })
-            .then(() => setFiles(files.filter(file => file.id !== fileId)))
-            .catch(error => alert('Error deleting file'));
-    };
-
-    const handleDownload = (fileId) => {
+            .then(() => {
+                setFiles(files.filter(file => file.id !== fileId));
+                alert('File deleted successfully');
+            })
+            .catch(error => {
+                const message = error.response?.data?.message || 'Error deleting file';
+                alert(message);
+            });
+    };    const handleDownload = (fileId) => {
         const token = localStorage.getItem('token');
         const headers = { Authorization: `Bearer ${token}` };
 
         axios.get(`http://127.0.0.1:8000/api/projects/${projectId}/files/${fileId}/download`, { headers, responseType: 'blob' })
-            .then(response => {
-                const contentDisposition = response.headers['content-disposition'];
-                const fileName = contentDisposition ? contentDisposition.split('filename=')[1] : 'downloaded_file';
-                const url = window.URL.createObjectURL(new Blob([response.data]));
+            .then(response => {                
+                
+                const contentType = response.headers['content-type'];
+                
+                // Get the name of the file from our files array using the fileId
+                const currentFile = files.find(f => f.id === fileId);
+                const fileName = currentFile ? currentFile.name : 'downloaded_file';
+                
+                // Create a blob with the correct MIME type from the response
+                const blob = new Blob([response.data], { type: contentType });
+                const url = window.URL.createObjectURL(blob);
+                
+                // Create a link and trigger download
                 const link = document.createElement('a');
                 link.href = url;
                 link.setAttribute('download', fileName);
                 document.body.appendChild(link);
                 link.click();
-                link.remove();
+                
+                // Clean up
+                setTimeout(() => {
+                    document.body.removeChild(link);
+                    window.URL.revokeObjectURL(url);
+                }, 100);
             })
             .catch(error => alert('Error downloading file'));
     };
@@ -110,9 +133,7 @@ const FileManagement = () => {
         setAssignedUserIds(file.assigned_user_ids || []);
         fetchFileMembers(file.id); // Fetch members when opening the modal
         setShowEditModal(true);
-    };
-
-    const handleSaveAccess = () => {
+    };    const handleSaveAccess = () => {
         const token = localStorage.getItem('token');
         const headers = { Authorization: `Bearer ${token}` };
 
@@ -124,23 +145,14 @@ const FileManagement = () => {
                 setFiles(files.map(file => file.id === response.data.id ? response.data : file));
                 setShowEditModal(false);
                 setSelectedFile(null);
+                alert('File access settings updated successfully');
             })
-            .catch(error => alert('Error updating access level'));
+            .catch(error => {
+                const message = error.response?.data?.message || 'Error updating access level';
+                alert(message);
+            });
     };
 
-    const handleUserSelection = (e) => {
-        const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
-        setAssignedUserIds(selectedOptions);
-    };
-
-    const handleUploadUserSelection = (e) => {
-        const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
-        setUploadAssignedUserIds(selectedOptions);
-
-        // Update the user names for display
-        const selectedUsers = selectedOptions.map(userId => users.find(user => user.id === userId));
-        setFileMembers(selectedUsers);
-    };
 
     const fetchFileMembers = (fileId) => {
         const token = localStorage.getItem('token');
@@ -183,24 +195,47 @@ const FileManagement = () => {
                 <Button variant="primary" onClick={() => setShowUploadModal(true)}>Upload File</Button>
             </div>
 
-            <div className="file-list-header">
-                <span>File Name</span>
-                <span>Access Level</span>
-                <span>Actions</span>
+            <div className="file-list">
+                <div className="file-list-header">
+                    <div className="file-cell">File Name</div>
+                    <div className="file-cell">Access Level</div>
+                    <div className="file-cell">Uploaded By</div>
+                    <div className="file-cell">Actions</div>
+                </div>
+                <div className="file-items">
+                    {files.map(file => {
+                        const currentUserId = parseInt(localStorage.getItem('user_id'));
+                        // Check if user is uploader or file is accessible
+                        if (file.access_level === 'restricted' && 
+                            file.uploader_id !== currentUserId && 
+                            !file.users?.some(user => user.id === currentUserId)) {
+                            return null;
+                        }
+                        
+                        return (
+                            <div key={file.id} className="file-item">
+                                <div className="file-cell">{file.name}</div>
+                                <div className="file-cell">
+                                    <span className={`access-level ${file.access_level}`}>
+                                        {file.access_level}
+                                    </span>
+                                </div>
+                                <div className="file-cell">{file.uploader?.name || 'Unknown'}</div>
+                                <div className="file-cell actions">
+                                    <Button variant="info" onClick={() => handleDownload(file.id)}>Download</Button>
+                                    {/* Only show edit and delete buttons if current user is the uploader */}
+                                    {file.uploader_id === parseInt(localStorage.getItem('user_id')) && (
+                                        <>
+                                            <Button variant="warning" onClick={() => handleEditAccess(file)}>Edit Access</Button>
+                                            <Button variant="danger" onClick={() => handleDelete(file.id)}>Delete</Button>
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
             </div>
-            <ul className="file-list">
-                {files.map(file => (
-                    <li key={file.id} className="file-item">
-                        <span>{file.name}</span>
-                        <span className={`access-level ${file.access_level}`}>{file.access_level}</span>
-                        <div className="actions">
-                            <Button variant="info" onClick={() => handleDownload(file.id)}>Download</Button>
-                            <Button variant="warning" onClick={() => handleEditAccess(file)}>Edit Access</Button>
-                            <Button variant="danger" onClick={() => handleDelete(file.id)}>Delete</Button>
-                        </div>
-                    </li>
-                ))}
-            </ul>
 
             <Modal show={showUploadModal} onHide={() => setShowUploadModal(false)}>
                 <Modal.Header closeButton>

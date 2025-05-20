@@ -3,8 +3,11 @@
     padding: 20px;
     width: 100%;
     max-width: 1200px;
+    min-height: calc(100vh - 3rem);
     margin: 3rem auto 0;
     box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
 }
 
 /* Table styles */
